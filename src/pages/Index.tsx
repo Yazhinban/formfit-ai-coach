@@ -1,16 +1,14 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import Header from '@/components/Header';
-import VideoInput from '@/components/VideoInput';
-import PoseAnalysis from '@/components/PoseAnalysis';
-import ChatInterface from '@/components/ChatInterface';
-import ResultsView from '@/components/ResultsView';
 import { usePoseDetection } from '@/hooks/usePoseDetection';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Play, Pause, RotateCcw, Check } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+
+// Import refactored components
+import UploadTab from '@/components/upload/UploadTab';
+import AnalysisTab from '@/components/analysis/AnalysisTab';
+import ResultsTab from '@/components/results/ResultsTab';
 
 const Index = () => {
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
@@ -121,167 +119,36 @@ const Index = () => {
           </TabsList>
           
           <TabsContent value="upload" className="mt-6">
-            <VideoInput onVideoLoaded={handleVideoLoaded} />
-            
-            <div className="mt-6 flex justify-end">
-              <Button 
-                onClick={() => setActiveTab("analyze")}
-                disabled={!videoElement}
-              >
-                Next: Analyze Form <Check className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
+            <UploadTab 
+              onVideoLoaded={handleVideoLoaded}
+              videoElement={videoElement}
+              onNavigateToAnalyze={() => setActiveTab("analyze")}
+            />
           </TabsContent>
           
           <TabsContent value="analyze" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <Card className="overflow-hidden">
-                  <div className="relative video-container bg-black">
-                    {videoElement && (
-                      <>
-                        <PoseAnalysis 
-                          videoElement={videoElement} 
-                          keypoints={keypoints} 
-                          issues={analysisResult?.issues.map(i => ({ part: i.part, issue: i.issue })) || []} 
-                        />
-                      </>
-                    )}
-                  </div>
-                  
-                  <div className="p-4 flex justify-between border-t">
-                    {isAnalyzing ? (
-                      <Button variant="outline" onClick={handleStopAnalysis}>
-                        <Pause className="mr-2 h-4 w-4" /> Stop Analysis
-                      </Button>
-                    ) : (
-                      <Button variant="default" onClick={handleStartAnalysis}>
-                        <Play className="mr-2 h-4 w-4" /> Start Analysis
-                      </Button>
-                    )}
-                    
-                    <Button variant="outline" onClick={handleResetAnalysis}>
-                      <RotateCcw className="mr-2 h-4 w-4" /> Reset
-                    </Button>
-                  </div>
-                </Card>
-                
-                {analysisComplete && analysisResult && (
-                  <div className="mt-6">
-                    <ResultsView 
-                      exercise={analysisResult.exercise}
-                      score={analysisResult.score}
-                      issues={analysisResult.issues}
-                      reps={analysisResult.reps}
-                    />
-                  </div>
-                )}
-              </div>
-              
-              <div>
-                <ChatInterface 
-                  onSendMessage={handleSendMessage}
-                />
-              </div>
-            </div>
-            
-            <div className="mt-6 flex justify-between">
-              <Button 
-                variant="outline" 
-                onClick={() => setActiveTab("upload")}
-              >
-                Back to Upload
-              </Button>
-              
-              <Button 
-                onClick={() => setActiveTab("results")}
-                disabled={!analysisComplete}
-              >
-                View Results <Check className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
+            <AnalysisTab 
+              videoElement={videoElement}
+              keypoints={keypoints}
+              isAnalyzing={isAnalyzing}
+              analysisComplete={analysisComplete}
+              analysisResult={analysisResult}
+              onStartAnalysis={handleStartAnalysis}
+              onStopAnalysis={handleStopAnalysis}
+              onResetAnalysis={handleResetAnalysis}
+              onSendMessage={handleSendMessage}
+              onNavigateToResults={() => setActiveTab("results")}
+              onNavigateToUpload={() => setActiveTab("upload")}
+            />
           </TabsContent>
           
           <TabsContent value="results" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                {analysisComplete && analysisResult ? (
-                  <>
-                    <Card className="mb-6">
-                      <CardHeader>
-                        <CardTitle>Exercise Analysis</CardTitle>
-                        <CardDescription>
-                          {analysisResult.exercise} form assessment
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <ResultsView 
-                          exercise={analysisResult.exercise}
-                          score={analysisResult.score}
-                          issues={analysisResult.issues}
-                          reps={analysisResult.reps}
-                        />
-                      </CardContent>
-                    </Card>
-                    
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Improvement Tips</CardTitle>
-                        <CardDescription>
-                          Suggested exercises and corrections
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <ul className="space-y-3">
-                          {analysisResult.issues.map((issue, i) => (
-                            <li key={i} className="flex items-start gap-3">
-                              <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-0.5">
-                                {i + 1}
-                              </div>
-                              <div>
-                                <h4 className="font-medium">Fix: {issue.issue}</h4>
-                                <p className="text-sm text-muted-foreground">{issue.suggestion}</p>
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                      </CardContent>
-                    </Card>
-                  </>
-                ) : (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>No Analysis Available</CardTitle>
-                      <CardDescription>
-                        Upload a video and complete the analysis to see results
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Button 
-                        onClick={() => setActiveTab("upload")}
-                      >
-                        Start Analysis
-                      </Button>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-              
-              <div>
-                <ChatInterface 
-                  onSendMessage={handleSendMessage}
-                />
-              </div>
-            </div>
-            
-            <div className="mt-6">
-              <Button 
-                variant="outline"
-                onClick={() => setActiveTab("analyze")}
-              >
-                Back to Analysis
-              </Button>
-            </div>
+            <ResultsTab 
+              analysisComplete={analysisComplete}
+              analysisResult={analysisResult}
+              onSendMessage={handleSendMessage}
+              onNavigateToAnalyze={() => setActiveTab("analyze")}
+            />
           </TabsContent>
         </Tabs>
       </main>
