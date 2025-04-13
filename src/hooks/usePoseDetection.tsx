@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 
 interface PosePoint {
@@ -70,18 +69,7 @@ const mockPoseData = (videoTime: number): PoseKeypoint[] => {
   return keypoints;
 };
 
-// Mock workout detection function - would be ML-based in production
-const detectWorkoutType = (keypoints: PoseKeypoint[]): { type: string; confidence: number } => {
-  // For demonstration purposes
-  const types = ['Squat', 'Push-up', 'Plank', 'Deadlift', 'Lunge'];
-  const randomIndex = Math.floor(Date.now() / 1000) % types.length;
-  return { 
-    type: types[randomIndex], 
-    confidence: 0.75 + Math.random() * 0.2
-  };
-};
-
-// Mock function to detect form issues
+// Mock form analysis
 const mockFormAnalysis = (keypoints: PoseKeypoint[], workoutType: string): AnalysisResult => {
   // Generate more realistic and specific analysis based on workout type
   
@@ -114,6 +102,54 @@ const mockFormAnalysis = (keypoints: PoseKeypoint[], workoutType: string): Analy
       ];
       break;
       
+    case 'Bench Press':
+      score = 82;
+      issues = [
+        {
+          part: 'wrists',
+          issue: 'Wrists bent backward under load',
+          severity: 'medium',
+          suggestion: 'Keep wrists straight and aligned with forearms. Consider wrist wraps for heavier sets.'
+        },
+        {
+          part: 'shoulders',
+          issue: 'Shoulders not retracted and stable',
+          severity: 'high',
+          suggestion: 'Pull shoulder blades together and down before unracking. Maintain this position throughout the lift.'
+        },
+        {
+          part: 'elbows',
+          issue: 'Elbows flared out too wide',
+          severity: 'medium',
+          suggestion: 'Keep elbows at about 45-60 degree angle to your torso to protect shoulders.'
+        }
+      ];
+      break;
+      
+    case 'Deadlift':
+      score = 68;
+      issues = [
+        {
+          part: 'back',
+          issue: 'Rounding of lower back',
+          severity: 'high',
+          suggestion: 'Maintain a neutral spine throughout the movement. Practice hip hinging without weight.'
+        },
+        {
+          part: 'knees',
+          issue: 'Knees too far forward at start',
+          severity: 'medium',
+          suggestion: 'Position shins close to the bar with knees behind the bar at starting position.'
+        },
+        {
+          part: 'shoulders',
+          issue: 'Shoulders rolling forward',
+          severity: 'medium',
+          suggestion: 'Keep shoulders retracted and down throughout the lift.'
+        }
+      ];
+      break;
+
     case 'Push-up':
       score = 82;
       issues = [
@@ -144,26 +180,38 @@ const mockFormAnalysis = (keypoints: PoseKeypoint[], workoutType: string): Analy
       ];
       break;
       
-    case 'Deadlift':
-      score = 68;
+    case 'Bicep Curl':
+      score = 78;
+      issues = [
+        {
+          part: 'elbows',
+          issue: 'Excessive elbow movement',
+          severity: 'high',
+          suggestion: 'Keep elbows fixed at sides throughout the movement.'
+        },
+        {
+          part: 'wrists',
+          issue: 'Wrist flexion during lift',
+          severity: 'medium',
+          suggestion: 'Maintain neutral wrist position throughout the curl.'
+        }
+      ];
+      break;
+      
+    case 'Shoulder Press':
+      score = 75;
       issues = [
         {
           part: 'back',
-          issue: 'Rounding of lower back',
+          issue: 'Excessive arching of lower back',
           severity: 'high',
-          suggestion: 'Maintain a neutral spine throughout the movement. Practice hip hinging without weight.'
-        },
-        {
-          part: 'knees',
-          issue: 'Knees too far forward at start',
-          severity: 'medium',
-          suggestion: 'Position shins close to the bar with knees behind the bar at starting position.'
+          suggestion: 'Engage core and maintain neutral spine. Consider using a seated position.'
         },
         {
           part: 'shoulders',
-          issue: 'Shoulders rolling forward',
+          issue: 'Uneven pressing height',
           severity: 'medium',
-          suggestion: 'Keep shoulders retracted and down throughout the lift.'
+          suggestion: 'Focus on pressing both arms at the same rate and height.'
         }
       ];
       break;
@@ -180,7 +228,7 @@ const mockFormAnalysis = (keypoints: PoseKeypoint[], workoutType: string): Analy
       ];
   }
   
-  // Return analysis result
+  // Return analysis result with the user-specified workout type
   return {
     score,
     exercise: workoutType,
@@ -194,7 +242,7 @@ const mockFormAnalysis = (keypoints: PoseKeypoint[], workoutType: string): Analy
   };
 };
 
-export const usePoseDetection = (videoElement: HTMLVideoElement | null) => {
+export const usePoseDetection = (videoElement: HTMLVideoElement | null, workoutType: string = "") => {
   const [keypoints, setKeypoints] = useState<PoseKeypoint[]>([]);
   const [isDetecting, setIsDetecting] = useState(false);
   const [detectedWorkout, setDetectedWorkout] = useState<string | null>(null);
@@ -279,12 +327,9 @@ export const usePoseDetection = (videoElement: HTMLVideoElement | null) => {
   
   // Analyze the recorded poses
   const analyzeForm = () => {
-    // In production, this would analyze the complete sequence of poses
-    // using a more sophisticated biomechanical model
-    
-    // For now, we use mock data
-    const workoutType = detectedWorkout || 'Squat';
-    const result = mockFormAnalysis(keypoints, workoutType);
+    // Use user-specified workout type instead of detected
+    const userWorkoutType = workoutType || detectedWorkout || 'Unknown Exercise';
+    const result = mockFormAnalysis(keypoints, userWorkoutType);
     setAnalysisResult(result);
     return result;
   };

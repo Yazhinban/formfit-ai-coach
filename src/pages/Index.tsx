@@ -16,6 +16,8 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<string>("upload");
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [analysisComplete, setAnalysisComplete] = useState<boolean>(false);
+  const [workoutType, setWorkoutType] = useState<string>("");
+  const [analysisProgress, setAnalysisProgress] = useState<number>(0);
   
   const { 
     keypoints, 
@@ -24,7 +26,7 @@ const Index = () => {
     stopDetection, 
     analyzeForm,
     analysisResult
-  } = usePoseDetection(videoElement);
+  } = usePoseDetection(videoElement, workoutType);
 
   const handleVideoLoaded = (video: HTMLVideoElement, file: File | null) => {
     setVideoElement(video);
@@ -32,11 +34,24 @@ const Index = () => {
     setAnalysisComplete(false);
   };
 
+  const handleWorkoutTypeChange = (type: string) => {
+    setWorkoutType(type);
+  };
+
   const handleStartAnalysis = () => {
     if (!videoElement) {
       toast({
         title: "No Video Available",
         description: "Please upload a video or use your camera first.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!workoutType) {
+      toast({
+        title: "Workout Type Missing",
+        description: "Please select what type of workout you're doing.",
         variant: "destructive",
       });
       return;
@@ -53,8 +68,26 @@ const Index = () => {
     
     toast({
       title: "Analysis Started",
-      description: "Analyzing your form...",
+      description: `Analyzing your ${workoutType} form...`,
     });
+    
+    // Simulate analysis progress
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+      progress += Math.floor(Math.random() * 10) + 1;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(progressInterval);
+      }
+      setAnalysisProgress(progress);
+    }, 500);
+    
+    // Simulate analysis completion (in real app, this would be event-driven)
+    setTimeout(() => {
+      if (progressInterval) clearInterval(progressInterval);
+      setAnalysisProgress(100);
+      handleStopAnalysis();
+    }, 5000); // 5 seconds for simulation
   };
 
   const handleStopAnalysis = () => {
@@ -71,7 +104,7 @@ const Index = () => {
     
     toast({
       title: "Analysis Complete",
-      description: `Form score: ${result.score}/100`,
+      description: `${workoutType} form score: ${result.score}/100`,
     });
     
     // Switch to results tab
@@ -86,18 +119,21 @@ const Index = () => {
     stopDetection();
     setIsAnalyzing(false);
     setAnalysisComplete(false);
+    setAnalysisProgress(0);
   };
 
   const handleSendMessage = async (message: string): Promise<string> => {
     // In a real app, this would call an AI service
     return new Promise((resolve) => {
       setTimeout(() => {
-        if (message.toLowerCase().includes('squat')) {
-          resolve("For proper squat form, keep your chest up, back straight, and knees tracking over your toes. Descend until your thighs are parallel to the ground. Would you like me to analyze your squat form?");
+        if (message.toLowerCase().includes(workoutType?.toLowerCase() || '')) {
+          resolve(`For proper ${workoutType} form, focus on maintaining proper alignment and technique. Would you like me to analyze your ${workoutType} form?`);
         } else if (message.toLowerCase().includes('feedback')) {
-          resolve("Based on your video, I noticed your knees are caving inward slightly. Try to push your knees outward in line with your toes throughout the movement. Your depth is good, but work on maintaining a more upright torso position.");
+          resolve(`Based on your ${workoutType || 'workout'} video, I noticed some areas for improvement. Keep working on maintaining proper form throughout the movement.`);
+        } else if (message.toLowerCase().includes('sets') || message.toLowerCase().includes('reps')) {
+          resolve(`For ${workoutType || 'most exercises'}, I recommend 3-4 sets of 8-12 reps for muscle growth, or 4-6 sets of 3-5 reps for strength. Rest 60-90 seconds between sets.`);
         } else {
-          resolve("I'm here to help with your exercise form! Upload a video or record yourself working out, and I can provide feedback to help you improve and prevent injuries.");
+          resolve("I'm your AI fitness coach! I can help with exercise form, workout plans, and technique tips. What would you like to know about your workout today?");
         }
       }, 1000);
     });
@@ -123,6 +159,7 @@ const Index = () => {
               onVideoLoaded={handleVideoLoaded}
               videoElement={videoElement}
               onNavigateToAnalyze={() => setActiveTab("analyze")}
+              onWorkoutTypeChange={handleWorkoutTypeChange}
             />
           </TabsContent>
           
@@ -139,6 +176,8 @@ const Index = () => {
               onSendMessage={handleSendMessage}
               onNavigateToResults={() => setActiveTab("results")}
               onNavigateToUpload={() => setActiveTab("upload")}
+              workoutType={workoutType}
+              analysisProgress={analysisProgress}
             />
           </TabsContent>
           
@@ -148,6 +187,7 @@ const Index = () => {
               analysisResult={analysisResult}
               onSendMessage={handleSendMessage}
               onNavigateToAnalyze={() => setActiveTab("analyze")}
+              workoutType={workoutType}
             />
           </TabsContent>
         </Tabs>

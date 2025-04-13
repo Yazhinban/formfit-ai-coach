@@ -50,6 +50,18 @@ const PoseAnalysis: React.FC<PoseAnalysisProps> = ({ videoElement, keypoints, is
   const overlayRef = useRef<HTMLDivElement>(null);
   const infoRef = useRef<HTMLDivElement>(null);
   
+  // Calculate a mock form accuracy score
+  const formAccuracy = React.useMemo(() => {
+    if (!keypoints.length) return null;
+    
+    // This would be a more sophisticated algorithm in production
+    const baseAccuracy = 75 + Math.floor(Math.random() * 20);
+    const issuesPenalty = issues.length * 3;
+    const finalAccuracy = Math.max(0, Math.min(100, baseAccuracy - issuesPenalty));
+    
+    return finalAccuracy;
+  }, [keypoints, issues]);
+  
   // Draw pose skeleton on the overlay
   useEffect(() => {
     if (!overlayRef.current || !keypoints.length || !videoElement) return;
@@ -171,10 +183,14 @@ const PoseAnalysis: React.FC<PoseAnalysisProps> = ({ videoElement, keypoints, is
       />
       
       {/* Form accuracy indicator */}
-      {keypoints.length > 0 && (
+      {formAccuracy !== null && (
         <div className="absolute bottom-4 right-4 bg-background/70 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-2">
           <div className="text-xs font-semibold">Form Accuracy:</div>
-          <div className="text-sm font-bold text-secondary">92%</div>
+          <div className={`text-sm font-bold ${
+            formAccuracy >= 80 ? 'text-green-500' : 
+            formAccuracy >= 60 ? 'text-amber-500' : 
+            'text-destructive'
+          }`}>{formAccuracy}%</div>
         </div>
       )}
     </div>

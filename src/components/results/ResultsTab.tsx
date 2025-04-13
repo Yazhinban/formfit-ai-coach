@@ -11,6 +11,7 @@ interface ResultsTabProps {
   analysisResult: any;
   onSendMessage: (message: string) => Promise<string>;
   onNavigateToAnalyze: () => void;
+  workoutType?: string;
 }
 
 const ResultsTab: React.FC<ResultsTabProps> = ({
@@ -18,6 +19,7 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
   analysisResult,
   onSendMessage,
   onNavigateToAnalyze,
+  workoutType,
 }) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -26,14 +28,14 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
           <>
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Exercise Analysis</CardTitle>
+                <CardTitle>{workoutType || analysisResult.exercise} Analysis</CardTitle>
                 <CardDescription>
-                  {analysisResult.exercise} form assessment
+                  Form assessment and recommendations
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResultsView 
-                  exercise={analysisResult.exercise}
+                  exercise={workoutType || analysisResult.exercise}
                   score={analysisResult.score}
                   issues={analysisResult.issues}
                   reps={analysisResult.reps}
@@ -74,7 +76,7 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button>
+              <Button onClick={onNavigateToAnalyze}>
                 Start Analysis
               </Button>
             </CardContent>
