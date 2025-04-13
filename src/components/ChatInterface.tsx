@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -100,7 +99,7 @@ const generateAIResponse = (message: string): string => {
     return fitnessKnowledge.nutrition.fat;
   } else if ((lowercaseMessage.includes('meal') && lowercaseMessage.includes('timing')) || 
              (lowercaseMessage.includes('when') && lowercaseMessage.includes('eat'))) {
-    return fitnessKnowledge.nutrition.meal_timing;
+    return fitnessKnowledge.nutrition["meal timing"];
   } else if (lowercaseMessage.includes('supplement')) {
     return fitnessKnowledge.nutrition.supplements;
   } else if (lowercaseMessage.includes('nutrition') || lowercaseMessage.includes('diet')) {
@@ -111,11 +110,11 @@ const generateAIResponse = (message: string): string => {
   if (lowercaseMessage.includes('sleep')) {
     return fitnessKnowledge.recovery.sleep;
   } else if (lowercaseMessage.includes('rest day')) {
-    return fitnessKnowledge.recovery.rest_days;
+    return fitnessKnowledge.recovery["rest days"];
   } else if (lowercaseMessage.includes('stretch')) {
     return fitnessKnowledge.recovery.stretching;
   } else if (lowercaseMessage.includes('foam roll')) {
-    return fitnessKnowledge.recovery.foam_rolling;
+    return fitnessKnowledge.recovery["foam rolling"];
   } else if (lowercaseMessage.includes('recovery')) {
     return "For optimal recovery, focus on quality sleep (7-9 hours nightly), proper nutrition, hydration, and including rest days in your training schedule. Would you like specific information about sleep, rest days, stretching, or foam rolling?";
   }
