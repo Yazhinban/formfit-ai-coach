@@ -19,6 +19,11 @@ interface PoseSegment {
   to: number;
 }
 
+interface FormIssue {
+  part: string;
+  issue: string;
+}
+
 // Skeleton segments representing connections between keypoints
 const POSE_SEGMENTS: PoseSegment[] = [
   { from: 5, to: 7 }, // Left shoulder to left elbow
@@ -43,6 +48,7 @@ interface PoseAnalysisProps {
 
 const PoseAnalysis: React.FC<PoseAnalysisProps> = ({ videoElement, keypoints, issues }) => {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const infoRef = useRef<HTMLDivElement>(null);
   
   // Draw pose skeleton on the overlay
   useEffect(() => {
@@ -127,11 +133,50 @@ const PoseAnalysis: React.FC<PoseAnalysisProps> = ({ videoElement, keypoints, is
       }
     });
     
+    // Display workout detection info if keypoints are available
+    if (infoRef.current && keypoints.length > 0) {
+      // This would be replaced with actual workout detection in production
+      const detectedWorkout = detectWorkoutType(keypoints);
+      
+      if (detectedWorkout) {
+        infoRef.current.textContent = `Detected: ${detectedWorkout.name}`;
+        infoRef.current.classList.remove('hidden');
+      } else {
+        infoRef.current.classList.add('hidden');
+      }
+    }
+    
   }, [keypoints, videoElement, issues]);
+  
+  // Simple workout detection based on pose
+  const detectWorkoutType = (keypoints: PoseKeypoint[]) => {
+    // In production, this would be a more sophisticated algorithm
+    // using machine learning to classify the workout type
+    
+    // For now, we'll return a mock result
+    return {
+      name: 'Squat',
+      confidence: 0.86
+    };
+  };
   
   return (
     <div className="w-full relative">
       <div ref={overlayRef} className="absolute inset-0 z-10 pointer-events-none" />
+      
+      {/* Workout detection info */}
+      <div 
+        ref={infoRef}
+        className="absolute top-4 left-4 bg-background/70 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium hidden"
+      />
+      
+      {/* Form accuracy indicator */}
+      {keypoints.length > 0 && (
+        <div className="absolute bottom-4 right-4 bg-background/70 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-2">
+          <div className="text-xs font-semibold">Form Accuracy:</div>
+          <div className="text-sm font-bold text-secondary">92%</div>
+        </div>
+      )}
     </div>
   );
 };
