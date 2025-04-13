@@ -1,356 +1,224 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import * as tf from '@tensorflow/tfjs';
+import * as poseDetection from '@tensorflow-models/pose-detection';
+import { calculateAngle, keypointMapping, exerciseAngleRanges } from '@/utils/poseUtils';
 
-interface PosePoint {
+interface KeyPoint {
   x: number;
   y: number;
   score: number;
 }
 
-interface PoseKeypoint {
-  position: PosePoint;
-  part: string;
+interface Pose {
+  keypoints: KeyPoint[];
   score: number;
 }
 
-interface FormIssue {
-  part: string;
-  issue: string;
-  severity: 'low' | 'medium' | 'high';
-  suggestion: string;
-}
-
-interface WorkoutMetrics {
-  reps: number;
-  formScore: number;
-  workoutType: string;
-  confidence: number;
-}
-
-export interface AnalysisResult {
+interface AnalysisResult {
   score: number;
-  exercise: string;
-  issues: FormIssue[];
-  reps?: number;
-  metrics?: {
-    kneeAngle?: number;
-    hipAngle?: number;
-    backAngle?: number;
-  };
+  feedback: string[];
+  goodPoints: string[];
+  improvementAreas: string[];
 }
 
-// This will be replaced with actual pose detection in production
-const mockPoseData = (videoTime: number): PoseKeypoint[] => {
-  // Generate fake keypoints for demonstration
-  const keypoints: PoseKeypoint[] = [
-    // Head
-    { part: 'nose', position: { x: 300 + Math.sin(videoTime) * 5, y: 100, score: 0.9 }, score: 0.9 },
-    { part: 'leftEye', position: { x: 280 + Math.sin(videoTime) * 3, y: 90, score: 0.8 }, score: 0.8 },
-    { part: 'rightEye', position: { x: 320 + Math.sin(videoTime) * 3, y: 90, score: 0.8 }, score: 0.8 },
-    { part: 'leftEar', position: { x: 270 + Math.sin(videoTime) * 2, y: 100, score: 0.7 }, score: 0.7 },
-    { part: 'rightEar', position: { x: 330 + Math.sin(videoTime) * 2, y: 100, score: 0.7 }, score: 0.7 },
-    
-    // Body
-    { part: 'leftShoulder', position: { x: 260 + Math.sin(videoTime + 1) * 3, y: 160, score: 0.9 }, score: 0.9 },
-    { part: 'rightShoulder', position: { x: 340 + Math.sin(videoTime + 1) * 3, y: 160, score: 0.9 }, score: 0.9 },
-    { part: 'leftElbow', position: { x: 240 + Math.cos(videoTime) * 20, y: 220 + Math.sin(videoTime) * 10, score: 0.8 }, score: 0.8 },
-    { part: 'rightElbow', position: { x: 360 + Math.cos(videoTime) * 20, y: 220 + Math.sin(videoTime) * 10, score: 0.8 }, score: 0.8 },
-    { part: 'leftWrist', position: { x: 230 + Math.sin(videoTime) * 25, y: 280 + Math.cos(videoTime) * 20, score: 0.7 }, score: 0.7 },
-    { part: 'rightWrist', position: { x: 370 + Math.sin(videoTime) * 25, y: 280 + Math.cos(videoTime) * 20, score: 0.7 }, score: 0.7 },
-    
-    // Lower Body
-    { part: 'leftHip', position: { x: 280, y: 300, score: 0.8 }, score: 0.8 },
-    { part: 'rightHip', position: { x: 320, y: 300, score: 0.8 }, score: 0.8 },
-    { part: 'leftKnee', position: { x: 280, y: 400 + Math.sin(videoTime) * 20, score: 0.7 }, score: 0.7 },
-    { part: 'rightKnee', position: { x: 320, y: 400 + Math.sin(videoTime) * 20, score: 0.7 }, score: 0.7 },
-    { part: 'leftAnkle', position: { x: 280, y: 480 + Math.cos(videoTime) * 5, score: 0.6 }, score: 0.6 },
-    { part: 'rightAnkle', position: { x: 320, y: 480 + Math.cos(videoTime) * 5, score: 0.6 }, score: 0.6 },
-  ];
-  
-  return keypoints;
-};
-
-// Mock form analysis
-const mockFormAnalysis = (keypoints: PoseKeypoint[], workoutType: string): AnalysisResult => {
-  // Generate more realistic and specific analysis based on workout type
-  
-  let score: number;
-  let issues: FormIssue[] = [];
-  let reps = Math.floor(Math.random() * 8) + 3; // Random reps between 3 and 10
-  
-  switch(workoutType) {
-    case 'Squat':
-      score = 75;
-      issues = [
-        {
-          part: 'knees',
-          issue: 'Knees caving inward during descent',
-          severity: 'medium',
-          suggestion: 'Focus on pushing knees outward in line with toes. Try using a resistance band around knees during practice.'
-        },
-        {
-          part: 'back',
-          issue: 'Excessive forward lean',
-          severity: 'high',
-          suggestion: 'Keep chest up and maintain neutral spine. Practice wall squats to build proper form awareness.'
-        },
-        {
-          part: 'ankles',
-          issue: 'Limited ankle mobility',
-          severity: 'low',
-          suggestion: 'Work on ankle mobility exercises and consider elevating heels slightly with a small plate under them.'
-        }
-      ];
-      break;
-      
-    case 'Bench Press':
-      score = 82;
-      issues = [
-        {
-          part: 'wrists',
-          issue: 'Wrists bent backward under load',
-          severity: 'medium',
-          suggestion: 'Keep wrists straight and aligned with forearms. Consider wrist wraps for heavier sets.'
-        },
-        {
-          part: 'shoulders',
-          issue: 'Shoulders not retracted and stable',
-          severity: 'high',
-          suggestion: 'Pull shoulder blades together and down before unracking. Maintain this position throughout the lift.'
-        },
-        {
-          part: 'elbows',
-          issue: 'Elbows flared out too wide',
-          severity: 'medium',
-          suggestion: 'Keep elbows at about 45-60 degree angle to your torso to protect shoulders.'
-        }
-      ];
-      break;
-      
-    case 'Deadlift':
-      score = 68;
-      issues = [
-        {
-          part: 'back',
-          issue: 'Rounding of lower back',
-          severity: 'high',
-          suggestion: 'Maintain a neutral spine throughout the movement. Practice hip hinging without weight.'
-        },
-        {
-          part: 'knees',
-          issue: 'Knees too far forward at start',
-          severity: 'medium',
-          suggestion: 'Position shins close to the bar with knees behind the bar at starting position.'
-        },
-        {
-          part: 'shoulders',
-          issue: 'Shoulders rolling forward',
-          severity: 'medium',
-          suggestion: 'Keep shoulders retracted and down throughout the lift.'
-        }
-      ];
-      break;
-
-    case 'Push-up':
-      score = 82;
-      issues = [
-        {
-          part: 'elbows',
-          issue: 'Elbows flaring out too wide',
-          severity: 'medium',
-          suggestion: 'Keep elbows at a 45-degree angle to your body to protect shoulders.'
-        },
-        {
-          part: 'hips',
-          issue: 'Hips sagging during movement',
-          severity: 'high',
-          suggestion: 'Engage your core throughout the entire movement. Practice plank holds to build core strength.'
-        }
-      ];
-      break;
-      
-    case 'Plank':
-      score = 90;
-      issues = [
-        {
-          part: 'hips',
-          issue: 'Hips too high',
-          severity: 'low',
-          suggestion: 'Lower hips to create a straight line from head to heels.'
-        }
-      ];
-      break;
-      
-    case 'Bicep Curl':
-      score = 78;
-      issues = [
-        {
-          part: 'elbows',
-          issue: 'Excessive elbow movement',
-          severity: 'high',
-          suggestion: 'Keep elbows fixed at sides throughout the movement.'
-        },
-        {
-          part: 'wrists',
-          issue: 'Wrist flexion during lift',
-          severity: 'medium',
-          suggestion: 'Maintain neutral wrist position throughout the curl.'
-        }
-      ];
-      break;
-      
-    case 'Shoulder Press':
-      score = 75;
-      issues = [
-        {
-          part: 'back',
-          issue: 'Excessive arching of lower back',
-          severity: 'high',
-          suggestion: 'Engage core and maintain neutral spine. Consider using a seated position.'
-        },
-        {
-          part: 'shoulders',
-          issue: 'Uneven pressing height',
-          severity: 'medium',
-          suggestion: 'Focus on pressing both arms at the same rate and height.'
-        }
-      ];
-      break;
-      
-    default:
-      score = 85;
-      issues = [
-        {
-          part: 'form',
-          issue: 'Minor form inconsistencies',
-          severity: 'low',
-          suggestion: 'Focus on maintaining consistent form throughout the entire set.'
-        }
-      ];
-  }
-  
-  // Return analysis result with the user-specified workout type
-  return {
-    score,
-    exercise: workoutType,
-    issues,
-    reps,
-    metrics: {
-      kneeAngle: Math.floor(85 + Math.random() * 20),
-      hipAngle: Math.floor(100 + Math.random() * 30),
-      backAngle: Math.floor(160 + Math.random() * 20)
-    }
-  };
-};
-
-export const usePoseDetection = (videoElement: HTMLVideoElement | null, workoutType: string = "") => {
-  const [keypoints, setKeypoints] = useState<PoseKeypoint[]>([]);
+export const usePoseDetection = (
+  videoElement: HTMLVideoElement | null,
+  workoutType: string
+) => {
+  const [keypoints, setKeypoints] = useState<KeyPoint[]>([]);
   const [isDetecting, setIsDetecting] = useState(false);
-  const [detectedWorkout, setDetectedWorkout] = useState<string | null>(null);
-  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
-  const [workoutMetrics, setWorkoutMetrics] = useState<WorkoutMetrics | null>(null);
+  const [detectorModel, setDetectorModel] = useState<any>(null);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult>({
+    score: 0,
+    feedback: [],
+    goodPoints: [],
+    improvementAreas: [],
+  });
   
-  const rafId = useRef<number | null>(null);
-  const lastTimeRef = useRef<number>(0);
-  const keypointHistoryRef = useRef<PoseKeypoint[][]>([]);
-  const processingTimeRef = useRef<number[]>([]);
-
-  // Start pose detection
-  const startDetection = () => {
-    if (!videoElement || isDetecting) return;
-    
-    setIsDetecting(true);
-    lastTimeRef.current = 0;
-    keypointHistoryRef.current = [];
-    processingTimeRef.current = [];
-    
-    const detectPose = (time: number) => {
-      if (!videoElement) {
-        setIsDetecting(false);
-        return;
-      }
+  const requestRef = useRef<number>();
+  const poses = useRef<Pose[]>([]);
+  const poseHistory = useRef<Pose[][]>([]);
+  const detectedWorkout = useRef<string>(workoutType || '');
+  
+  // Effect for loading the pose detector model
+  useEffect(() => {
+    const loadModel = async () => {
+      // Use MoveNet for better performance in browser
+      const model = poseDetection.SupportedModels.MoveNet;
+      const detector = await poseDetection.createDetector(model, {
+        modelType: 'lightning',
+      });
       
-      // Only process every 100ms for performance in this mock
-      // In production with real ML, we'd optimize this based on device capability
-      if (time - lastTimeRef.current > 100) {
-        const startTime = performance.now();
-        
-        const elapsedSeconds = videoElement.currentTime;
-        const mockData = mockPoseData(elapsedSeconds);
-        setKeypoints(mockData);
-        
-        // Store keypoint history for better analysis
-        keypointHistoryRef.current.push(mockData);
-        if (keypointHistoryRef.current.length > 30) { // Keep last 30 frames (3 seconds at 10fps)
-          keypointHistoryRef.current.shift();
-        }
-        
-        // Detect workout type every 10 frames
-        if (keypointHistoryRef.current.length % 10 === 0) {
-          const workoutResult = detectWorkoutType(mockData);
-          if (workoutResult.confidence > 0.7) {
-            setDetectedWorkout(workoutResult.type);
-            // Update workout metrics
-            setWorkoutMetrics({
-              reps: Math.floor(elapsedSeconds / 3), // Mock rep counting
-              formScore: Math.round(70 + Math.random() * 25),
-              workoutType: workoutResult.type,
-              confidence: workoutResult.confidence
-            });
-          }
-        }
-        
-        lastTimeRef.current = time;
-        
-        // Track processing time for performance optimization
-        const endTime = performance.now();
-        processingTimeRef.current.push(endTime - startTime);
-        if (processingTimeRef.current.length > 50) {
-          processingTimeRef.current.shift();
-        }
-      }
-      
-      rafId.current = requestAnimationFrame(detectPose);
+      setDetectorModel(detector);
+      console.log('Pose detection model loaded');
     };
     
-    rafId.current = requestAnimationFrame(detectPose);
-  };
+    loadModel().catch(console.error);
+    
+    return () => {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
+    };
+  }, []);
   
-  // Stop pose detection
-  const stopDetection = () => {
-    if (rafId.current) {
-      cancelAnimationFrame(rafId.current);
-      rafId.current = null;
+  // Effect for saving the workout type
+  useEffect(() => {
+    if (workoutType) {
+      detectedWorkout.current = workoutType;
+      console.log(`Workout type set: ${workoutType}`);
+    }
+  }, [workoutType]);
+  
+  const detectPose = async () => {
+    if (!videoElement || !detectorModel || !isDetecting) return;
+    
+    try {
+      const videoPoses = await detectorModel.estimatePoses(videoElement);
+      
+      if (videoPoses && videoPoses.length > 0) {
+        // Save pose data
+        poses.current = videoPoses;
+        const currentKeypoints = videoPoses[0].keypoints;
+        
+        // Keep a history of poses for analysis
+        poseHistory.current.push([...videoPoses]);
+        if (poseHistory.current.length > 30) { // Keep last 30 frames
+          poseHistory.current.shift();
+        }
+        
+        setKeypoints(currentKeypoints);
+      }
+    } catch (error) {
+      console.error('Error in pose detection:', error);
     }
     
-    setIsDetecting(false);
+    // Continue the detection loop
+    requestRef.current = requestAnimationFrame(detectPose);
   };
   
-  // Analyze the recorded poses
-  const analyzeForm = () => {
-    // Use user-specified workout type instead of detected
-    const userWorkoutType = workoutType || detectedWorkout || 'Unknown Exercise';
-    const result = mockFormAnalysis(keypoints, userWorkoutType);
+  const startDetection = () => {
+    if (detectorModel && videoElement) {
+      setIsDetecting(true);
+      poseHistory.current = []; // Reset history when starting new detection
+      requestRef.current = requestAnimationFrame(detectPose);
+    }
+  };
+  
+  const stopDetection = () => {
+    setIsDetecting(false);
+    if (requestRef.current) {
+      cancelAnimationFrame(requestRef.current);
+    }
+  };
+  
+  // This is simplified analysis logic; real-world app would be more sophisticated
+  const analyzeForm = (): AnalysisResult => {
+    let formScore = 0;
+    const feedback = [];
+    const goodPoints = [];
+    const improvementAreas = [];
+    
+    // Based on the workout type, analyze the pose history
+    if (detectedWorkout.current && poseHistory.current.length > 0) {
+      const workoutName = detectedWorkout.current.toLowerCase();
+      
+      // Score calculation based on the detected workout
+      if (workoutName.includes('squat')) {
+        formScore = analyzeSquatForm();
+      } else if (workoutName.includes('pushup') || workoutName.includes('push-up') || workoutName.includes('push up')) {
+        formScore = analyzePushupForm();
+      } else if (workoutName.includes('plank')) {
+        formScore = analyzePlankForm();
+      } else if (workoutName.includes('deadlift')) {
+        formScore = analyzeDeadliftForm();
+      } else if (workoutName.includes('bench') || workoutName.includes('press')) {
+        formScore = analyzeChestPressForm();
+      } else {
+        // Default analysis for other workouts
+        formScore = analyzeGeneralForm();
+      }
+      
+      // Cap the score between 0-100
+      formScore = Math.min(100, Math.max(0, formScore));
+      
+      // Generate feedback based on the score
+      if (formScore > 90) {
+        feedback.push(`Great ${detectedWorkout.current} form! Your technique is excellent.`);
+        goodPoints.push('Excellent body alignment throughout the movement');
+        goodPoints.push('Proper tempo and control of the exercise');
+      } else if (formScore > 70) {
+        feedback.push(`Good ${detectedWorkout.current} form. Some minor adjustments could help.`);
+        goodPoints.push('Generally good body alignment');
+        improvementAreas.push('Work on maintaining consistent form throughout each rep');
+      } else {
+        feedback.push(`Your ${detectedWorkout.current} form needs improvement. Focus on technique.`);
+        improvementAreas.push('Focus on proper body alignment');
+        improvementAreas.push('Control the movement throughout the entire range of motion');
+      }
+    }
+    
+    const result = {
+      score: formScore,
+      feedback,
+      goodPoints,
+      improvementAreas,
+    };
+    
     setAnalysisResult(result);
     return result;
   };
   
-  // Get average processing time for performance metrics
-  const getPerformanceMetrics = () => {
-    if (processingTimeRef.current.length === 0) return { avgProcessingTime: 0 };
+  // Example analysis function for squats
+  const analyzeSquatForm = () => {
+    // This is simplified - real app would have more detailed analysis
+    let score = 80; // Start with a base score
     
-    const sum = processingTimeRef.current.reduce((a, b) => a + b, 0);
-    const avgProcessingTime = sum / processingTimeRef.current.length;
+    // Example of checking knee alignment during squat
+    // Lower score if knees cave in or track incorrectly
+    score -= Math.random() * 20; // Simplified for demo
     
-    return { avgProcessingTime };
+    return score;
   };
   
-  useEffect(() => {
-    return () => {
-      if (rafId.current) {
-        cancelAnimationFrame(rafId.current);
-      }
-    };
-  }, []);
+  // Example analysis function for push-ups
+  const analyzePushupForm = () => {
+    let score = 85;
+    // Check alignment, depth, etc.
+    score -= Math.random() * 15; 
+    return score;
+  };
+  
+  // Example analysis function for planks
+  const analyzePlankForm = () => {
+    let score = 90;
+    // Check spine alignment, hip position, etc.
+    score -= Math.random() * 10;
+    return score;
+  };
+  
+  // Analysis for deadlifts
+  const analyzeDeadliftForm = () => {
+    let score = 85;
+    // Check hip hinge, back alignment, etc.
+    score -= Math.random() * 15;
+    return score;
+  };
+  
+  // Analysis for bench press and similar exercises
+  const analyzeChestPressForm = () => {
+    let score = 82;
+    // Check bar path, wrist alignment, etc.
+    score -= Math.random() * 12;
+    return score;
+  };
+  
+  // Generic analysis for other exercises
+  const analyzeGeneralForm = () => {
+    let score = 75;
+    score -= Math.random() * 20;
+    return score;
+  };
   
   return {
     keypoints,
@@ -359,8 +227,5 @@ export const usePoseDetection = (videoElement: HTMLVideoElement | null, workoutT
     stopDetection,
     analyzeForm,
     analysisResult,
-    detectedWorkout,
-    workoutMetrics,
-    performanceMetrics: getPerformanceMetrics()
   };
 };
