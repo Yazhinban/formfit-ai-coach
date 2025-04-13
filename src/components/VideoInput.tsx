@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Upload, Camera, Video, Pause, RotateCcw, Timer, X, Check, Gallery } from 'lucide-react';
+import { Upload, Camera, Video, Pause, RotateCcw, Timer, X, Check, Images } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface VideoInputProps {
@@ -343,7 +343,7 @@ const VideoInput = ({ onVideoLoaded }: VideoInputProps) => {
                 description: "Opening your device gallery...",
               })}
             >
-              <Gallery className="mr-2 h-4 w-4" /> Gallery
+              <Images className="mr-2 h-4 w-4" /> Gallery
             </Button>
           </>
         )}
