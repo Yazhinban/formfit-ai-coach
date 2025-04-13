@@ -1,46 +1,46 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Header from '@/components/Header';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart3, Play, Info, Dumbbell, Award } from 'lucide-react';
+import { BarChart3, Play, Info, Dumbbell, Award, Volume2, Volume1, VolumeX, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
 import { toast } from '@/hooks/use-toast';
+import { Slider } from '@/components/ui/slider';
 
-// Sample video URLs for different exercises
+// Sample video URLs for different exercises with reliable backup sources
 const exerciseVideoUrls = {
-  // Upper body videos
-  'Bench Press': 'https://storage.googleapis.com/afs-prod/media/27c9014416924d618460e5e662232e2c/800.webm',
-  'Push-up': 'https://storage.googleapis.com/afs-prod/media/02bd218036ae4671b4424e3999198bb8/800.webm',
-  'Shoulder Press': 'https://storage.googleapis.com/afs-prod/media/a8fe0759532b424b97667f063bad17c6/800.webm',
-  'Pull-up': 'https://storage.googleapis.com/afs-prod/media/02bd218036ae4671b4424e3999198bb8/800.webm',
-  'Bicep Curl': 'https://storage.googleapis.com/afs-prod/media/254b9e73fb4e4219bc07fce324320d0c/800.webm',
-  'Tricep Extension': 'https://storage.googleapis.com/afs-prod/media/1f0e276c1b6544e183c1857192d2a60c/800.webm',
+  // More reliable video sources
+  'Bench Press': 'https://player.vimeo.com/external/530253146.sd.mp4?s=ac94db1562c649fefe00c8f0e437a14459feccc0&profile_id=164',
+  'Push-up': 'https://player.vimeo.com/external/558954802.sd.mp4?s=1de985948e6e850c322868c88d9575a239c5818c&profile_id=164',
+  'Shoulder Press': 'https://player.vimeo.com/external/495492198.sd.mp4?s=86009dafa9c8d5fa655aadee1f48bcfa2999b8a2&profile_id=164',
+  'Pull-up': 'https://player.vimeo.com/external/684072395.sd.mp4?s=2c34e9d22c648877c5b48b609363c31580b8a298&profile_id=164',
+  'Bicep Curl': 'https://player.vimeo.com/external/691412770.sd.mp4?s=307ae98ed42c493c6ce8d1bf678f0e1d8774cb76&profile_id=164',
+  'Tricep Extension': 'https://player.vimeo.com/external/657880192.sd.mp4?s=7add993bb9db573af9ec0e695145c00223758388&profile_id=164',
   
-  // Lower body videos
-  'Squat': 'https://storage.googleapis.com/afs-prod/media/0a791a27d98440509efd4917a8138b32/800.webm',
-  'Deadlift': 'https://storage.googleapis.com/afs-prod/media/6bb58e81eba94530ae20953466adea7e/800.webm',
-  'Lunge': 'https://storage.googleapis.com/afs-prod/media/98ac61c3f5e04702848e1fd555e36a4b/800.webm',
-  'Leg Press': 'https://storage.googleapis.com/afs-prod/media/0a791a27d98440509efd4917a8138b32/800.webm',
+  'Squat': 'https://player.vimeo.com/external/496463781.sd.mp4?s=7e09e037b197df126b2c07c85d244c124d3d78a9&profile_id=164',
+  'Deadlift': 'https://player.vimeo.com/external/487740048.sd.mp4?s=57ad4b07383f2821c412a8d08a0a3079682851d1&profile_id=164',
+  'Lunge': 'https://player.vimeo.com/external/556070169.sd.mp4?s=bdb93ab8023577cd5948ba0e0d37f7f47654aee9&profile_id=164',
+  'Leg Press': 'https://player.vimeo.com/external/568448048.sd.mp4?s=db0188b3080e9230ed0efe6533c223ada6a72d0d&profile_id=164',
   
-  // Core videos
-  'Plank': 'https://storage.googleapis.com/afs-prod/media/915ada84fde5420ea345ffdcba3a180b/800.webm',
-  'Sit-up': 'https://storage.googleapis.com/afs-prod/media/b784ca81c9f14d6eace1efd52d553dad/800.webm',
-  'Russian Twist': 'https://storage.googleapis.com/afs-prod/media/e76abc0781d64457a13a867408084e3f/800.webm',
+  'Plank': 'https://player.vimeo.com/external/556071954.sd.mp4?s=e011143591444df8d3eaeddc2175dfb131f99650&profile_id=164',
+  'Sit-up': 'https://player.vimeo.com/external/690330440.sd.mp4?s=b43bce64e8ba3e29e7ad66d03194e1f808332817&profile_id=164',
+  'Russian Twist': 'https://player.vimeo.com/external/510483775.sd.mp4?s=c34c373f54bb0f188e0dc6fadb9e809e4940d731&profile_id=164',
   
-  // Full body videos
-  'Burpee': 'https://storage.googleapis.com/afs-prod/media/863dfb85a3bb422d90c12f373e61e223/800.webm',
-  'Clean and Jerk': 'https://storage.googleapis.com/afs-prod/media/d2ceacfcfa1345099559bc79dff8a6fc/800.webm',
+  'Burpee': 'https://player.vimeo.com/external/528378677.sd.mp4?s=8aa38015c18b37d4b9a72cf1d9539df17acf4ccf&profile_id=164',
+  'Clean and Jerk': 'https://player.vimeo.com/external/531467877.sd.mp4?s=f06cea1f479948aefc8691242d7005b4da03e6e0&profile_id=164',
   
-  // Gym exercises
-  'Lat Pulldown': 'https://storage.googleapis.com/afs-prod/media/c2c7e4ac9e004db5a5d05c912e2eaefc/800.webm',
-  'Cable Row': 'https://storage.googleapis.com/afs-prod/media/c2c7e4ac9e004db5a5d05c912e2eaefc/800.webm',
-  'Leg Extension': 'https://storage.googleapis.com/afs-prod/media/0a791a27d98440509efd4917a8138b32/800.webm',
+  'Lat Pulldown': 'https://player.vimeo.com/external/523089050.sd.mp4?s=859a8ad0c4589b02d8a05bd99fa32f873c324f43&profile_id=164',
+  'Cable Row': 'https://player.vimeo.com/external/550777491.sd.mp4?s=c22563dfc33d47f4e3cad1151bd720f402ef2605&profile_id=164',
+  'Leg Extension': 'https://player.vimeo.com/external/556071145.sd.mp4?s=52362f21ad4912328b5465c355f5dd9884e6a433&profile_id=164',
 };
+
+// Fallback video in case the main one fails
+const fallbackVideo = 'https://player.vimeo.com/external/517090076.sd.mp4?s=ec2a75d5299ec8190c606582c19cc31573984f5a&profile_id=164';
 
 const FormLibrary = () => {
   const [activeCategory, setActiveCategory] = useState('upper-body');
@@ -84,12 +84,20 @@ const FormLibrary = () => {
   const [selectedVideo, setSelectedVideo] = useState<number | null>(null);
   const [isVideoLoading, setIsVideoLoading] = useState<boolean>(false);
   const [videoProgress, setVideoProgress] = useState<number>(0);
+  const [isMuted, setIsMuted] = useState<boolean>(true);
+  const [volume, setVolume] = useState<number>(50);
+  const [isPlaying, setIsPlaying] = useState<boolean>(true);
+  const [hasError, setHasError] = useState<boolean>(false);
+  
+  // Video ref to control playback
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   
   // Handle video selection
   const handleVideoSelect = (videoId: number) => {
     setSelectedVideo(videoId);
     setIsVideoLoading(true);
     setVideoProgress(0);
+    setHasError(false);
     
     // Simulate video loading
     const loadingInterval = setInterval(() => {
@@ -104,6 +112,86 @@ const FormLibrary = () => {
       });
     }, 200);
   };
+
+  // Handle video volume change
+  const handleVolumeChange = (value: number[]) => {
+    const newVolume = value[0];
+    setVolume(newVolume);
+    
+    if (videoRef.current) {
+      videoRef.current.volume = newVolume / 100;
+    }
+    
+    // Auto-unmute when volume is increased from zero
+    if (newVolume > 0 && isMuted) {
+      setIsMuted(false);
+      if (videoRef.current) videoRef.current.muted = false;
+    }
+    
+    // Auto-mute when volume is set to zero
+    if (newVolume === 0 && !isMuted) {
+      setIsMuted(true);
+      if (videoRef.current) videoRef.current.muted = true;
+    }
+  };
+  
+  // Toggle mute status
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+    }
+  };
+  
+  // Toggle play/pause
+  const togglePlayPause = () => {
+    setIsPlaying(!isPlaying);
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+    }
+  };
+  
+  // Handle video error
+  const handleVideoError = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
+    console.error("Video error:", e);
+    setHasError(true);
+    setIsVideoLoading(false);
+    
+    toast({
+      title: "Video Error",
+      description: "We're having trouble playing this video. Trying a backup source...",
+      variant: "destructive",
+    });
+    
+    // Attempt to use fallback video
+    if (videoRef.current) {
+      videoRef.current.src = fallbackVideo;
+      videoRef.current.load();
+      videoRef.current.play().catch(err => {
+        console.error("Fallback video failed to play:", err);
+        toast({
+          title: "Playback Failed",
+          description: "Unable to play video. Please try again later.",
+          variant: "destructive",
+        });
+      });
+    }
+  };
+  
+  // When component unmounts, clean up video element
+  useEffect(() => {
+    return () => {
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.src = '';
+        videoRef.current.load();
+      }
+    };
+  }, []);
   
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -148,37 +236,103 @@ const FormLibrary = () => {
                       {isVideoLoading ? (
                         // Loading state
                         <div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-black/80">
-                          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                          <Loader2 className="h-16 w-16 text-primary animate-spin mb-4" />
                           <p className="text-sm mb-2">Loading video...</p>
                           <div className="w-64 mb-2">
                             <Progress value={videoProgress} className="h-2" />
                           </div>
                           <p className="text-xs text-muted-foreground">{videoProgress}%</p>
                         </div>
+                      ) : hasError ? (
+                        // Error state
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-black/80">
+                          <p className="text-lg font-semibold mb-2">Video Unavailable</p>
+                          <p className="text-sm text-center max-w-md mb-4">
+                            Sorry, we couldn't play this video. We're trying to load a backup video instead.
+                          </p>
+                          <Button 
+                            onClick={() => {
+                              setHasError(false);
+                              setIsVideoLoading(true);
+                              setTimeout(() => setIsVideoLoading(false), 1500);
+                            }} 
+                            variant="outline"
+                            size="sm"
+                          >
+                            Try Again
+                          </Button>
+                        </div>
                       ) : (
                         // Video player
-                        <video 
-                          controls 
-                          autoPlay
-                          className="w-full h-full object-cover"
-                          src={activeVideos.find(v => v.id === selectedVideo)?.videoUrl}
-                          poster={activeVideos.find(v => v.id === selectedVideo)?.thumbnail}
-                          onError={() => {
-                            toast({
-                              title: "Video Error",
-                              description: "There was an error playing this video. Please try again.",
-                              variant: "destructive",
-                            });
-                          }}
-                          onPlay={() => {
-                            toast({
-                              title: "Video Started",
-                              description: `Now playing: ${activeVideos.find(v => v.id === selectedVideo)?.title} form guide`,
-                            });
-                          }}
-                        >
-                          Your browser does not support the video tag.
-                        </video>
+                        <>
+                          <video 
+                            ref={videoRef}
+                            className="w-full h-full object-cover"
+                            src={activeVideos.find(v => v.id === selectedVideo)?.videoUrl || fallbackVideo}
+                            poster={activeVideos.find(v => v.id === selectedVideo)?.thumbnail}
+                            autoPlay
+                            muted={isMuted}
+                            playsInline
+                            loop
+                            onError={handleVideoError}
+                            onLoadStart={() => setIsVideoLoading(true)}
+                            onCanPlay={() => {
+                              setIsVideoLoading(false);
+                              setIsPlaying(true);
+                            }}
+                            onPlay={() => {
+                              setIsPlaying(true);
+                              toast({
+                                title: "Video Started",
+                                description: `Now playing: ${activeVideos.find(v => v.id === selectedVideo)?.title} form guide`,
+                              });
+                            }}
+                            onPause={() => setIsPlaying(false)}
+                          >
+                            Your browser does not support the video tag.
+                          </video>
+                          
+                          {/* Video controls overlay */}
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="icon" className="text-white" onClick={togglePlayPause}>
+                                  {isPlaying ? (
+                                    <Pause className="h-6 w-6" />
+                                  ) : (
+                                    <Play className="h-6 w-6" />
+                                  )}
+                                </Button>
+                                
+                                <div className="flex items-center gap-2">
+                                  <Button variant="ghost" size="icon" className="text-white" onClick={toggleMute}>
+                                    {isMuted || volume === 0 ? (
+                                      <VolumeX className="h-5 w-5" />
+                                    ) : volume < 50 ? (
+                                      <Volume1 className="h-5 w-5" />
+                                    ) : (
+                                      <Volume2 className="h-5 w-5" />
+                                    )}
+                                  </Button>
+                                  
+                                  <div className="w-24 hidden sm:block">
+                                    <Slider
+                                      value={[volume]}
+                                      min={0}
+                                      max={100}
+                                      step={1}
+                                      onValueChange={handleVolumeChange}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="text-white text-sm">
+                                {activeVideos.find(v => v.id === selectedVideo)?.title} - Perfect Form
+                              </div>
+                            </div>
+                          </div>
+                        </>
                       )}
                     </div>
                     
