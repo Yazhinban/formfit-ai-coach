@@ -39,12 +39,16 @@ const AnalysisTab: React.FC<AnalysisTabProps> = ({
   workoutType,
   analysisProgress,
 }) => {
+  // Ensure we have valid data to work with
+  const safeResult = analysisResult || {};
+  const safeIssues = safeResult.issues || [];
+  
   // Create a safe mapping function to handle undefined issues
   const getIssues = () => {
-    if (!analysisResult || !analysisResult.issues) {
+    if (!safeIssues || !Array.isArray(safeIssues)) {
       return [];
     }
-    return analysisResult.issues.map((i: any) => ({ part: i.part, issue: i.issue })) || [];
+    return safeIssues.map((i: any) => ({ part: i.part || '', issue: i.issue || '' })) || [];
   };
 
   return (
@@ -108,13 +112,14 @@ const AnalysisTab: React.FC<AnalysisTabProps> = ({
           </div>
         </Card>
         
-        {analysisComplete && analysisResult && (
+        {analysisComplete && safeResult && (
           <div className="mt-6">
             <ResultsView 
-              exercise={analysisResult.exercise || workoutType || 'Unknown Exercise'}
-              score={analysisResult.score || 0}
-              issues={analysisResult.issues || []}
-              reps={analysisResult.reps || 0}
+              exercise={safeResult.exercise || workoutType || 'Unknown Exercise'}
+              score={safeResult.score || 0}
+              issues={safeIssues || []}
+              reps={safeResult.reps || 0}
+              metrics={safeResult.metrics || {}}
             />
           </div>
         )}
