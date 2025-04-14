@@ -16,8 +16,8 @@ import {
   ResponsiveContainer, 
   XAxis, 
   YAxis,
-  Tooltip,
-  CartesianGrid
+  CartesianGrid,
+  Tooltip
 } from 'recharts';
 import {
   Popover,
@@ -151,7 +151,17 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
                             tickFormatter={(value) => `${value}°`}
                           />
                           <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
-                          <Tooltip content={(props) => <ChartTooltipContent {...props} />} />
+                          <Tooltip 
+                            // This is the key change - we're not using content prop directly anymore
+                            contentStyle={{ 
+                              background: 'var(--background)', 
+                              border: '1px solid var(--border)',
+                              borderRadius: '0.5rem',
+                              boxShadow: 'var(--shadow)'
+                            }}
+                            formatter={(value) => [`${value}°`, 'Joint Angle']}
+                            labelFormatter={(label) => `Time: ${label}s`}
+                          />
                           <Area 
                             type="monotone" 
                             dataKey="angle" 
