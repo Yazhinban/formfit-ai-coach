@@ -216,7 +216,7 @@ const Index = () => {
         <p className="text-muted-foreground mb-8">Upload or record your workout to get real-time form correction</p>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Personal Info Card */}
+          {/* Profile Info Card */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2">

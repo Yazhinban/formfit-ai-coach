@@ -16,8 +16,8 @@ const Header = () => {
         <nav className="hidden md:flex items-center space-x-6">
           <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">Form Analyzer</Link>
           <Link to="/form-library" className="text-muted-foreground hover:text-foreground transition-colors">Form Library</Link>
-          <Link to="#" className="text-muted-foreground hover:text-foreground transition-colors">Exercises</Link>
-          <Link to="#" className="text-muted-foreground hover:text-foreground transition-colors">About</Link>
+          <Link to="/exercises" className="text-muted-foreground hover:text-foreground transition-colors">Exercises</Link>
+          <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">About</Link>
         </nav>
       </div>
     </header>

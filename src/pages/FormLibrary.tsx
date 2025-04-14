@@ -10,7 +10,6 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
 import { toast } from '@/hooks/use-toast';
-import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -39,6 +38,7 @@ const exerciseImages = {
 const FormLibrary = () => {
   const [activeCategory, setActiveCategory] = useState('upper-body');
   const [requestExercise, setRequestExercise] = useState('');
+  const [requestedExercises, setRequestedExercises] = useState<Array<{id: number, title: string, difficulty: string, image: string}>>([]);
   
   // Mock library data with images instead of videos
   const libraryData = {
@@ -89,10 +89,22 @@ const FormLibrary = () => {
   
   const handleSubmitRequest = () => {
     if (requestExercise.trim()) {
+      const newExerciseId = Math.max(...Object.values(libraryData).flatMap(exercises => exercises.map(ex => ex.id))) + 1;
+      
+      const newRequestedExercise = {
+        id: newExerciseId,
+        title: requestExercise,
+        difficulty: 'custom',
+        image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80'
+      };
+      
+      setRequestedExercises(prev => [newRequestedExercise, ...prev]);
+      
       toast({
         title: "Exercise Request Submitted",
-        description: "We'll consider adding this exercise type to our library soon!",
+        description: "Your requested exercise has been added to the library!",
       });
+      
       setRequestExercise('');
     } else {
       toast({
@@ -147,13 +159,70 @@ const FormLibrary = () => {
           {Object.keys(libraryData).map(category => (
             <TabsContent key={category} value={category} className="mt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Show requested exercises at the top */}
+                {category === activeCategory && requestedExercises.length > 0 && (
+                  <>
+                    {requestedExercises.map(exercise => (
+                      <Card key={`requested-${exercise.id}`} className="overflow-hidden hover:shadow-md transition-shadow border-primary/20">
+                        <div 
+                          className="aspect-video bg-muted relative cursor-pointer"
+                          onClick={() => handleExerciseSelect(exercise.id)}
+                        >
+                          <img 
+                            src={exercise.image} 
+                            alt={exercise.title} 
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute top-2 right-2">
+                            <Badge variant="secondary" className="bg-primary/20">Requested</Badge>
+                          </div>
+                          <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                            <Button variant="secondary" size="icon">
+                              <Info className="h-6 w-6" />
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="font-semibold">{exercise.title}</h3>
+                              <p className="text-xs text-muted-foreground">Custom exercise</p>
+                            </div>
+                            <Badge variant="outline">
+                              custom
+                            </Badge>
+                          </div>
+                        </CardContent>
+                        
+                        <CardFooter className="px-4 pb-4 pt-0">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full"
+                            onClick={() => handleExerciseSelect(exercise.id)}
+                          >
+                            <Info className="h-4 w-4 mr-1" /> View Details
+                          </Button>
+                        </CardFooter>
+                      </Card>
+                    ))}
+                  </>
+                )}
+              
                 {selectedExercise ? (
                   // Exercise details view
                   <div className="col-span-full bg-muted rounded-lg overflow-hidden">
                     <div className="aspect-video relative">
                       <img 
-                        src={activeExercises.find(ex => ex.id === selectedExercise)?.image} 
-                        alt={activeExercises.find(ex => ex.id === selectedExercise)?.title}
+                        src={
+                          requestedExercises.find(ex => ex.id === selectedExercise)?.image || 
+                          activeExercises.find(ex => ex.id === selectedExercise)?.image
+                        } 
+                        alt={
+                          requestedExercises.find(ex => ex.id === selectedExercise)?.title || 
+                          activeExercises.find(ex => ex.id === selectedExercise)?.title
+                        }
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -162,7 +231,10 @@ const FormLibrary = () => {
                       <div className="flex justify-between items-start mb-4">
                         <div>
                           <h3 className="text-xl font-bold">
-                            {activeExercises.find(ex => ex.id === selectedExercise)?.title} Perfect Form
+                            {
+                              requestedExercises.find(ex => ex.id === selectedExercise)?.title || 
+                              activeExercises.find(ex => ex.id === selectedExercise)?.title
+                            } Perfect Form
                           </h3>
                           <p className="text-muted-foreground text-sm">
                             Learn the perfect form technique
@@ -228,55 +300,53 @@ const FormLibrary = () => {
                     </div>
                   </div>
                 ) : (
-                  // Exercise grid view
-                  <>
-                    {activeExercises.map(exercise => (
-                      <Card key={exercise.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                        <div 
-                          className="aspect-video bg-muted relative cursor-pointer"
+                  // Exercise grid view - show regular exercises after requested ones
+                  activeExercises.map(exercise => (
+                    <Card key={exercise.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                      <div 
+                        className="aspect-video bg-muted relative cursor-pointer"
+                        onClick={() => handleExerciseSelect(exercise.id)}
+                      >
+                        <img 
+                          src={exercise.image} 
+                          alt={exercise.title} 
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                          <Button variant="secondary" size="icon">
+                            <Info className="h-6 w-6" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-semibold">{exercise.title}</h3>
+                            <p className="text-xs text-muted-foreground">Perfect form guide</p>
+                          </div>
+                          <Badge variant={
+                            exercise.difficulty === 'beginner' ? 'outline' : 
+                            exercise.difficulty === 'intermediate' ? 'secondary' : 
+                            'default'
+                          }>
+                            {exercise.difficulty}
+                          </Badge>
+                        </div>
+                      </CardContent>
+                      
+                      <CardFooter className="px-4 pb-4 pt-0">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full"
                           onClick={() => handleExerciseSelect(exercise.id)}
                         >
-                          <img 
-                            src={exercise.image} 
-                            alt={exercise.title} 
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                            <Button variant="secondary" size="icon">
-                              <Info className="h-6 w-6" />
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h3 className="font-semibold">{exercise.title}</h3>
-                              <p className="text-xs text-muted-foreground">Perfect form guide</p>
-                            </div>
-                            <Badge variant={
-                              exercise.difficulty === 'beginner' ? 'outline' : 
-                              exercise.difficulty === 'intermediate' ? 'secondary' : 
-                              'default'
-                            }>
-                              {exercise.difficulty}
-                            </Badge>
-                          </div>
-                        </CardContent>
-                        
-                        <CardFooter className="px-4 pb-4 pt-0">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="w-full"
-                            onClick={() => handleExerciseSelect(exercise.id)}
-                          >
-                            <Info className="h-4 w-4 mr-1" /> View Details
-                          </Button>
-                        </CardFooter>
-                      </Card>
-                    ))}
-                  </>
+                          <Info className="h-4 w-4 mr-1" /> View Details
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  ))
                 )}
               </div>
             </TabsContent>
