@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import * as tf from '@tensorflow/tfjs';
 import * as poseDetection from '@tensorflow-models/pose-detection';
@@ -76,7 +77,7 @@ export const usePoseDetection = (
       // Use MoveNet for better performance in browser
       const model = poseDetection.SupportedModels.MoveNet;
       const detector = await poseDetection.createDetector(model, {
-        modelType: 'lightning',
+        modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING
       });
       
       setDetectorModel(detector);

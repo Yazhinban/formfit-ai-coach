@@ -1,31 +1,17 @@
 
 import React, { useState } from 'react';
 import Header from '@/components/Header';
-import { usePoseDetection } from '@/hooks/usePoseDetection';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from '@/hooks/use-toast';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { UserRound, CalendarDays, Dumbbell } from 'lucide-react';
-
-// Import refactored components
-import UploadTab from '@/components/upload/UploadTab';
-import AnalysisTab from '@/components/analysis/AnalysisTab';
-import ResultsTab from '@/components/results/ResultsTab';
+import { UserRound, CalendarDays, Dumbbell, ChevronRight, VideoIcon } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { Link } from 'react-router-dom';
 
 const Index = () => {
-  const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
-  const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [activeTab, setActiveTab] = useState<string>("upload");
-  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
-  const [analysisComplete, setAnalysisComplete] = useState<boolean>(false);
-  const [workoutType, setWorkoutType] = useState<string>("");
-  const [analysisProgress, setAnalysisProgress] = useState<number>(0);
-  
   // Personal info state
   const [personalInfo, setPersonalInfo] = useState({
     name: "",
@@ -45,137 +31,6 @@ const Index = () => {
     saturday: "",
     sunday: ""
   });
-  
-  const { 
-    keypoints, 
-    isDetecting, 
-    startDetection, 
-    stopDetection, 
-    analyzeForm,
-    analysisResult
-  } = usePoseDetection(videoElement, workoutType);
-
-  const handleVideoLoaded = (video: HTMLVideoElement, file: File | null) => {
-    setVideoElement(video);
-    setVideoFile(file);
-    setAnalysisComplete(false);
-  };
-
-  const handleWorkoutTypeChange = (type: string) => {
-    setWorkoutType(type);
-  };
-
-  const handleStartAnalysis = () => {
-    if (!videoElement) {
-      toast({
-        title: "No Video Available",
-        description: "Please upload a video or use your camera first.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!workoutType) {
-      toast({
-        title: "Workout Type Missing",
-        description: "Please select what type of workout you're doing.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsAnalyzing(true);
-    
-    if (videoFile) {
-      // For uploaded videos, play the video and detect poses
-      videoElement.play().catch(console.error);
-    }
-    
-    startDetection();
-    
-    toast({
-      title: "Analysis Started",
-      description: `Analyzing your ${workoutType} form...`,
-    });
-    
-    // Simulate analysis progress
-    let progress = 0;
-    const progressInterval = setInterval(() => {
-      progress += Math.floor(Math.random() * 10) + 1;
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(progressInterval);
-      }
-      setAnalysisProgress(progress);
-    }, 500);
-    
-    // Simulate analysis completion (in real app, this would be event-driven)
-    setTimeout(() => {
-      if (progressInterval) clearInterval(progressInterval);
-      setAnalysisProgress(100);
-      handleStopAnalysis();
-    }, 5000); // 5 seconds for simulation
-  };
-
-  const handleStopAnalysis = () => {
-    if (videoElement && videoFile) {
-      videoElement.pause();
-    }
-    
-    stopDetection();
-    setIsAnalyzing(false);
-    
-    // Perform final analysis
-    const result = analyzeForm();
-    setAnalysisComplete(true);
-    
-    toast({
-      title: "Analysis Complete",
-      description: `${workoutType} form score: ${result.score}/100`,
-    });
-    
-    // Switch to results tab
-    setActiveTab("results");
-  };
-
-  const handleResetAnalysis = () => {
-    if (videoElement && videoFile) {
-      videoElement.currentTime = 0;
-    }
-    
-    stopDetection();
-    setIsAnalyzing(false);
-    setAnalysisComplete(false);
-    setAnalysisProgress(0);
-  };
-
-  const handleSendMessage = async (message: string): Promise<string> => {
-    // In a real app, this would call an AI service
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (message.toLowerCase().includes('workout plan')) {
-          resolve(`Here's a balanced weekly workout plan:
-          Monday: Upper body (bench press, rows, shoulder press)
-          Tuesday: Lower body (squats, lunges, leg press)
-          Wednesday: Rest or light cardio
-          Thursday: Push exercises (chest, shoulders, triceps)
-          Friday: Pull exercises (back, biceps)
-          Saturday: Core and cardio
-          Sunday: Rest day`);
-        } else if (message.toLowerCase().includes(workoutType?.toLowerCase() || '')) {
-          resolve(`For proper ${workoutType} form, focus on maintaining proper alignment and technique. Would you like me to analyze your ${workoutType} form?`);
-        } else if (message.toLowerCase().includes('feedback')) {
-          resolve(`Based on your ${workoutType || 'workout'} video, I noticed some areas for improvement. Keep working on maintaining proper form throughout the movement.`);
-        } else if (message.toLowerCase().includes('sets') || message.toLowerCase().includes('reps')) {
-          resolve(`For ${workoutType || 'most exercises'}, I recommend 3-4 sets of 8-12 reps for muscle growth, or 4-6 sets of 3-5 reps for strength. Rest 60-90 seconds between sets.`);
-        } else if (message.toLowerCase().includes('diet') || message.toLowerCase().includes('nutrition')) {
-          resolve(`For optimal fitness results, focus on balanced nutrition with adequate protein (0.8-1g per pound of bodyweight), complex carbs for energy, and healthy fats. Stay hydrated and time your meals around your workouts.`);
-        } else {
-          resolve("I'm your AI fitness coach! I can help with exercise form, workout plans, and technique tips. What would you like to know about your workout today?");
-        }
-      }, 1000);
-    });
-  };
 
   // Handle personal info changes
   const handlePersonalInfoChange = (field: string, value: string) => {
@@ -207,17 +62,34 @@ const Index = () => {
     "Yoga/Flexibility"
   ];
 
+  const handleSavePlan = () => {
+    toast({
+      title: "Plan Saved",
+      description: "Your workout plan has been saved successfully.",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
       
       <main className="flex-1 container max-w-7xl py-8 px-4 sm:px-6">
-        <h1 className="text-3xl font-bold mb-2">Form Analyzer</h1>
-        <p className="text-muted-foreground mb-8">Upload or record your workout to get real-time form correction</p>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">FormFit Dashboard</h1>
+            <p className="text-muted-foreground">Manage your fitness profile and workout plan</p>
+          </div>
+          <Link to="/form-analyzer">
+            <Button className="flex items-center gap-2" size="lg">
+              <VideoIcon className="h-5 w-5" /> 
+              Go to Form Analyzer
+            </Button>
+          </Link>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Profile Info Card */}
-          <Card>
+          <Card className="md:col-span-1">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2">
                 <UserRound className="h-5 w-5" />
@@ -273,6 +145,7 @@ const Index = () => {
                     placeholder="E.g., Vegetarian, High-protein, etc."
                   />
                 </div>
+                <Button className="mt-2">Save Profile</Button>
               </div>
             </CardContent>
           </Card>
@@ -284,6 +157,9 @@ const Index = () => {
                 <CalendarDays className="h-5 w-5" />
                 Weekly Workout Plan
               </CardTitle>
+              <CardDescription>
+                Plan your workout routine for the entire week
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -318,7 +194,7 @@ const Index = () => {
               </div>
               <Separator className="my-4" />
               <div className="flex justify-end">
-                <Button size="sm">
+                <Button onClick={handleSavePlan}>
                   <Dumbbell className="h-4 w-4 mr-2" />
                   Save Plan
                 </Button>
@@ -326,51 +202,54 @@ const Index = () => {
             </CardContent>
           </Card>
         </div>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="upload">Upload Video</TabsTrigger>
-            <TabsTrigger value="analyze">Analyze Form</TabsTrigger>
-            <TabsTrigger value="results">Results</TabsTrigger>
-          </TabsList>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Workout Recommendations</CardTitle>
+              <CardDescription>Based on your profile and goals</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2">
+                {[
+                  "Focus on compound exercises for maximum efficiency",
+                  "Include 2-3 days of strength training per week",
+                  "Add 1-2 days of cardio for heart health",
+                  "Don't forget mobility work and stretching",
+                  "Rest is crucial - ensure you have 1-2 rest days"
+                ].map((tip, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <ChevronRight className="h-5 w-5 text-primary mt-0.5" />
+                    <span>{tip}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
           
-          <TabsContent value="upload" className="mt-6">
-            <UploadTab 
-              onVideoLoaded={handleVideoLoaded}
-              videoElement={videoElement}
-              onNavigateToAnalyze={() => setActiveTab("analyze")}
-              onWorkoutTypeChange={handleWorkoutTypeChange}
-            />
-          </TabsContent>
-          
-          <TabsContent value="analyze" className="mt-6">
-            <AnalysisTab 
-              videoElement={videoElement}
-              keypoints={keypoints}
-              isAnalyzing={isAnalyzing}
-              analysisComplete={analysisComplete}
-              analysisResult={analysisResult}
-              onStartAnalysis={handleStartAnalysis}
-              onStopAnalysis={handleStopAnalysis}
-              onResetAnalysis={handleResetAnalysis}
-              onSendMessage={handleSendMessage}
-              onNavigateToResults={() => setActiveTab("results")}
-              onNavigateToUpload={() => setActiveTab("upload")}
-              workoutType={workoutType}
-              analysisProgress={analysisProgress}
-            />
-          </TabsContent>
-          
-          <TabsContent value="results" className="mt-6">
-            <ResultsTab 
-              analysisComplete={analysisComplete}
-              analysisResult={analysisResult}
-              onSendMessage={handleSendMessage}
-              onNavigateToAnalyze={() => setActiveTab("analyze")}
-              workoutType={workoutType}
-            />
-          </TabsContent>
-        </Tabs>
+          <Card>
+            <CardHeader>
+              <CardTitle>Nutrition Tips</CardTitle>
+              <CardDescription>General guidance for your fitness journey</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2">
+                {[
+                  "Aim for 0.8-1g of protein per pound of bodyweight",
+                  "Stay hydrated - drink at least 8 glasses of water daily",
+                  "Eat a balanced diet with plenty of vegetables",
+                  "Time your carbohydrates around your workouts",
+                  "Consider protein intake within 30 minutes post-workout"
+                ].map((tip, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <ChevronRight className="h-5 w-5 text-primary mt-0.5" />
+                    <span>{tip}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
       </main>
       
       <footer className="py-6 border-t">

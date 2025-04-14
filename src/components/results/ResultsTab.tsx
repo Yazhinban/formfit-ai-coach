@@ -5,11 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Check, Share2, Activity, ChevronRight, Copy, Facebook, Twitter, Linkedin } from 'lucide-react';
 import ResultsView from '@/components/ResultsView';
 import ChatInterface from '@/components/ChatInterface';
-import { 
-  ChartContainer, 
-  ChartTooltip, 
-  ChartTooltipContent
-} from '@/components/ui/chart';
+import { ChartContainer } from '@/components/ui/chart';
 import { 
   Area, 
   AreaChart, 
@@ -91,7 +87,7 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2">
-        {analysisComplete && analysisResult ? (
+        {analysisComplete && safeResult ? (
           <>
             <Card className="mb-6">
               <CardHeader>
@@ -152,15 +148,14 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
                           />
                           <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
                           <Tooltip 
-                            // This is the key change - we're not using content prop directly anymore
                             contentStyle={{ 
                               background: 'var(--background)', 
                               border: '1px solid var(--border)',
                               borderRadius: '0.5rem',
                               boxShadow: 'var(--shadow)'
                             }}
-                            formatter={(value) => [`${value}°`, 'Joint Angle']}
-                            labelFormatter={(label) => `Time: ${label}s`}
+                            formatter={(value: any) => [`${value}°`, 'Joint Angle']}
+                            labelFormatter={(label: any) => `Time: ${label}s`}
                           />
                           <Area 
                             type="monotone" 
@@ -189,7 +184,7 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {safeIssues.length > 0 ? (
+                {Array.isArray(safeIssues) && safeIssues.length > 0 ? (
                   <ul className="space-y-3">
                     {safeIssues.map((issue: any, i: number) => (
                       <li key={i} className="flex items-start gap-3">

@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import FormLibrary from "./pages/FormLibrary";
 import NotFound from "./pages/NotFound";
+import FormAnalyzer from "./pages/FormAnalyzer";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/form-library" element={<FormLibrary />} />
+          <Route path="/form-analyzer" element={<FormAnalyzer />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
