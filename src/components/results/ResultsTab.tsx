@@ -21,6 +21,10 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
   onNavigateToAnalyze,
   workoutType,
 }) => {
+  // Ensure we have valid data to work with
+  const safeResult = analysisResult || {};
+  const safeIssues = safeResult.issues || [];
+  
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2">
@@ -28,17 +32,17 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
           <>
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>{workoutType || analysisResult.exercise} Analysis</CardTitle>
+                <CardTitle>{workoutType || safeResult.exercise || 'Workout'} Analysis</CardTitle>
                 <CardDescription>
                   Form assessment and recommendations
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResultsView 
-                  exercise={workoutType || analysisResult.exercise}
-                  score={analysisResult.score}
-                  issues={analysisResult.issues}
-                  reps={analysisResult.reps}
+                  exercise={workoutType || safeResult.exercise || 'Unknown Exercise'}
+                  score={safeResult.score || 0}
+                  issues={safeIssues}
+                  reps={safeResult.reps || 0}
                 />
               </CardContent>
             </Card>
@@ -51,19 +55,23 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-3">
-                  {analysisResult.issues.map((issue: any, i: number) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-0.5">
-                        {i + 1}
-                      </div>
-                      <div>
-                        <h4 className="font-medium">Fix: {issue.issue}</h4>
-                        <p className="text-sm text-muted-foreground">{issue.suggestion}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                {safeIssues.length > 0 ? (
+                  <ul className="space-y-3">
+                    {safeIssues.map((issue: any, i: number) => (
+                      <li key={i} className="flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-0.5">
+                          {i + 1}
+                        </div>
+                        <div>
+                          <h4 className="font-medium">Fix: {issue.issue}</h4>
+                          <p className="text-sm text-muted-foreground">{issue.suggestion || 'Maintain proper form and alignment.'}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-muted-foreground">No specific issues detected. Keep up the good work!</p>
+                )}
               </CardContent>
             </Card>
           </>
