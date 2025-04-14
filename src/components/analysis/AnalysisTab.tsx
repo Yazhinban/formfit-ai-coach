@@ -39,6 +39,14 @@ const AnalysisTab: React.FC<AnalysisTabProps> = ({
   workoutType,
   analysisProgress,
 }) => {
+  // Create a safe mapping function to handle undefined issues
+  const getIssues = () => {
+    if (!analysisResult || !analysisResult.issues) {
+      return [];
+    }
+    return analysisResult.issues.map((i: any) => ({ part: i.part, issue: i.issue })) || [];
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2">
@@ -49,7 +57,7 @@ const AnalysisTab: React.FC<AnalysisTabProps> = ({
                 <PoseAnalysis 
                   videoElement={videoElement} 
                   keypoints={keypoints} 
-                  issues={analysisResult?.issues.map((i: any) => ({ part: i.part, issue: i.issue })) || []} 
+                  issues={getIssues()} 
                 />
                 
                 {/* Loading overlay during analysis */}
@@ -103,10 +111,10 @@ const AnalysisTab: React.FC<AnalysisTabProps> = ({
         {analysisComplete && analysisResult && (
           <div className="mt-6">
             <ResultsView 
-              exercise={analysisResult.exercise}
-              score={analysisResult.score}
-              issues={analysisResult.issues}
-              reps={analysisResult.reps}
+              exercise={analysisResult.exercise || workoutType || 'Unknown Exercise'}
+              score={analysisResult.score || 0}
+              issues={analysisResult.issues || []}
+              reps={analysisResult.reps || 0}
             />
           </div>
         )}

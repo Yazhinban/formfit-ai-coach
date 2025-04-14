@@ -46,7 +46,7 @@ interface PoseAnalysisProps {
   issues: { part: string; issue: string }[];
 }
 
-const PoseAnalysis: React.FC<PoseAnalysisProps> = ({ videoElement, keypoints, issues }) => {
+const PoseAnalysis: React.FC<PoseAnalysisProps> = ({ videoElement, keypoints = [], issues = [] }) => {
   const overlayRef = useRef<HTMLDivElement>(null);
   const infoRef = useRef<HTMLDivElement>(null);
   
@@ -86,7 +86,7 @@ const PoseAnalysis: React.FC<PoseAnalysisProps> = ({ videoElement, keypoints, is
     
     // Add keypoints
     keypoints.forEach((keypoint, index) => {
-      if (keypoint.score > 0.3) { // Only show confident keypoints
+      if (keypoint && keypoint.position && keypoint.score > 0.3) { // Only show confident keypoints
         const { x, y } = keypoint.position;
         
         // Scale the coordinates to match the container size
@@ -115,7 +115,7 @@ const PoseAnalysis: React.FC<PoseAnalysisProps> = ({ videoElement, keypoints, is
       const to = keypoints[segment.to];
       
       // Only draw if both points are confident
-      if (from && to && from.score > 0.3 && to.score > 0.3) {
+      if (from && to && from.position && to.position && from.score > 0.3 && to.score > 0.3) {
         const fromX = from.position.x * scaleX;
         const fromY = from.position.y * scaleY;
         const toX = to.position.x * scaleX;

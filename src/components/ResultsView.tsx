@@ -23,7 +23,10 @@ interface ResultsViewProps {
   };
 }
 
-const ResultsView: React.FC<ResultsViewProps> = ({ exercise, score, issues, reps, metrics }) => {
+const ResultsView: React.FC<ResultsViewProps> = ({ exercise, score, issues = [], reps, metrics }) => {
+  // Ensure issues is always an array
+  const safeIssues = Array.isArray(issues) ? issues : [];
+  
   return (
     <div className="space-y-4">
       <Card>
@@ -85,10 +88,10 @@ const ResultsView: React.FC<ResultsViewProps> = ({ exercise, score, issues, reps
               </div>
             )}
             
-            {issues.length > 0 ? (
+            {safeIssues.length > 0 ? (
               <div className="space-y-3">
                 <h3 className="font-medium text-sm text-muted-foreground">Form Corrections:</h3>
-                {issues.map((issue, index) => (
+                {safeIssues.map((issue, index) => (
                   <div key={index} className="border-l-2 pl-4 py-1 space-y-1" style={{
                     borderColor: issue.severity === 'high' ? 'hsl(var(--destructive))' : 
                                issue.severity === 'medium' ? 'hsl(38 92% 50%)' : 
