@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Dumbbell, Book } from 'lucide-react';
+import { Dumbbell } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Header = () => {
@@ -14,7 +14,7 @@ const Header = () => {
           </h1>
         </div>
         <nav className="hidden md:flex items-center space-x-6">
-          <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">Home</Link>
+          <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">Form Analyzer</Link>
           <Link to="/form-library" className="text-muted-foreground hover:text-foreground transition-colors">Form Library</Link>
           <Link to="#" className="text-muted-foreground hover:text-foreground transition-colors">Exercises</Link>
           <Link to="#" className="text-muted-foreground hover:text-foreground transition-colors">About</Link>
