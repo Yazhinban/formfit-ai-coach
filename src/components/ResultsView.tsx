@@ -27,6 +27,9 @@ const ResultsView: React.FC<ResultsViewProps> = ({ exercise, score, issues = [],
   // Ensure issues is always an array
   const safeIssues = Array.isArray(issues) ? issues : [];
   
+  // Round the score to the nearest integer
+  const roundedScore = Math.round(score);
+  
   return (
     <div className="space-y-4">
       <Card>
@@ -39,8 +42,8 @@ const ResultsView: React.FC<ResultsViewProps> = ({ exercise, score, issues = [],
               </span>
             </CardTitle>
             <div className="text-2xl font-bold">
-              <span className={score >= 80 ? 'text-secondary' : score >= 60 ? 'text-amber-500' : 'text-destructive'}>
-                {score}/100
+              <span className={roundedScore >= 80 ? 'text-secondary' : roundedScore >= 60 ? 'text-amber-500' : 'text-destructive'}>
+                {roundedScore}/100
               </span>
             </div>
           </div>

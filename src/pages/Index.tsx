@@ -7,9 +7,18 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { UserRound, CalendarDays, Dumbbell, ChevronRight, VideoIcon } from 'lucide-react';
+import { UserRound, CalendarDays, Dumbbell, ChevronRight, VideoIcon, Plus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const Index = () => {
   // Personal info state
@@ -32,6 +41,20 @@ const Index = () => {
     sunday: ""
   });
 
+  // Exercise plan state
+  const [selectedDay, setSelectedDay] = useState("");
+  const [exercises, setExercises] = useState<Record<string, string[]>>({
+    monday: [],
+    tuesday: [],
+    wednesday: [],
+    thursday: [],
+    friday: [],
+    saturday: [],
+    sunday: []
+  });
+  const [newExercise, setNewExercise] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   // Handle personal info changes
   const handlePersonalInfoChange = (field: string, value: string) => {
     setPersonalInfo(prev => ({
@@ -46,6 +69,39 @@ const Index = () => {
       ...prev,
       [day]: value
     }));
+  };
+
+  // Handle adding exercises to a specific day
+  const handleAddExercise = () => {
+    if (!selectedDay) {
+      toast({
+        title: "No Day Selected",
+        description: "Please select a day to add exercises to.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!newExercise.trim()) {
+      toast({
+        title: "No Exercise Entered",
+        description: "Please enter an exercise name.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setExercises(prev => ({
+      ...prev,
+      [selectedDay]: [...prev[selectedDay as keyof typeof prev], newExercise]
+    }));
+
+    setNewExercise("");
+    
+    toast({
+      title: "Exercise Added",
+      description: `Added ${newExercise} to ${selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1)}'s workout.`,
+    });
   };
 
   // Available workout types for the weekly plan
@@ -67,6 +123,17 @@ const Index = () => {
       title: "Plan Saved",
       description: "Your workout plan has been saved successfully.",
     });
+  };
+
+  // Days of the week
+  const daysOfWeek = {
+    monday: "Monday",
+    tuesday: "Tuesday",
+    wednesday: "Wednesday",
+    thursday: "Thursday",
+    friday: "Friday",
+    saturday: "Saturday",
+    sunday: "Sunday"
   };
 
   return (
@@ -162,36 +229,96 @@ const Index = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {Object.entries({
-                  monday: "Monday",
-                  tuesday: "Tuesday",
-                  wednesday: "Wednesday",
-                  thursday: "Thursday",
-                  friday: "Friday",
-                  saturday: "Saturday",
-                  sunday: "Sunday"
-                }).map(([day, label]) => (
-                  <div key={day} className="flex flex-col gap-1.5">
-                    <Label htmlFor={day}>{label}</Label>
-                    <Select 
-                      value={weeklyPlan[day as keyof typeof weeklyPlan]} 
-                      onValueChange={(value) => handleWorkoutPlanChange(day, value)}
-                    >
-                      <SelectTrigger id={day}>
-                        <SelectValue placeholder="Select workout" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {workoutOptions.map((option) => (
-                          <SelectItem key={`${day}-${option}`} value={option}>
-                            {option}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                ))}
-              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Day</TableHead>
+                    <TableHead>Workout Type</TableHead>
+                    <TableHead className="text-right">Exercises</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Object.entries(daysOfWeek).map(([day, label]) => (
+                    <TableRow key={day}>
+                      <TableCell className="font-medium">{label}</TableCell>
+                      <TableCell>
+                        <Select 
+                          value={weeklyPlan[day as keyof typeof weeklyPlan]} 
+                          onValueChange={(value) => handleWorkoutPlanChange(day, value)}
+                        >
+                          <SelectTrigger id={day} className="w-full">
+                            <SelectValue placeholder="Select workout" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {workoutOptions.map((option) => (
+                              <SelectItem key={`${day}-${option}`} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Dialog open={dialogOpen && selectedDay === day} onOpenChange={(open) => {
+                          setDialogOpen(open);
+                          if (open) setSelectedDay(day);
+                        }}>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm" className="flex items-center gap-1">
+                              <Plus className="h-3.5 w-3.5" />
+                              Add Exercises
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Add Exercises for {label}</DialogTitle>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                              <div className="flex items-end gap-2">
+                                <div className="grid gap-2 flex-1">
+                                  <Label htmlFor="exercise-name">Exercise Name</Label>
+                                  <Input
+                                    id="exercise-name"
+                                    value={newExercise}
+                                    onChange={(e) => setNewExercise(e.target.value)}
+                                    placeholder="E.g., Bench Press, Squats"
+                                  />
+                                </div>
+                                <Button onClick={handleAddExercise}>Add</Button>
+                              </div>
+                              
+                              {exercises[day].length > 0 ? (
+                                <div>
+                                  <Label>Current Exercises:</Label>
+                                  <ul className="mt-2 space-y-1">
+                                    {exercises[day].map((exercise, index) => (
+                                      <li key={index} className="flex items-center gap-2">
+                                        <ChevronRight className="h-4 w-4 text-primary" />
+                                        <span>{exercise}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              ) : (
+                                <p className="text-sm text-muted-foreground">
+                                  No exercises added for {label} yet.
+                                </p>
+                              )}
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                        
+                        {exercises[day].length > 0 && (
+                          <div className="text-sm text-muted-foreground mt-1">
+                            {exercises[day].length} exercise(s)
+                          </div>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              
               <Separator className="my-4" />
               <div className="flex justify-end">
                 <Button onClick={handleSavePlan}>

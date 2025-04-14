@@ -4,6 +4,9 @@ import Header from '@/components/Header';
 import { usePoseDetection } from '@/hooks/usePoseDetection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 // Import refactored components
 import UploadTab from '@/components/upload/UploadTab';
@@ -155,6 +158,15 @@ const FormAnalyzer = () => {
       <Header />
       
       <main className="flex-1 container max-w-7xl py-8 px-4 sm:px-6">
+        <div className="flex items-center gap-3 mb-4">
+          <Link to="/">
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Home
+            </Button>
+          </Link>
+        </div>
+        
         <h1 className="text-3xl font-bold mb-2">Form Analyzer</h1>
         <p className="text-muted-foreground mb-8">Upload or record your workout to get real-time form correction</p>
         
