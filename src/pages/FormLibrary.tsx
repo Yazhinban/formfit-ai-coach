@@ -13,29 +13,29 @@ import { toast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
-// Sample exercise videos - replace images with video URLs
+// Updated exercise videos with reliable sources
 const exerciseVideos = {
-  'Bench Press': 'https://storage.googleapis.com/webfundamentals-assets/videos/chrome.mp4',
-  'Push-up': 'https://assets.mixkit.co/videos/preview/mixkit-man-exercising-in-a-gym-23478-large.mp4',
-  'Shoulder Press': 'https://assets.mixkit.co/videos/preview/mixkit-woman-at-the-gym-performing-shoulder-presses-40342-large.mp4',
-  'Pull-up': 'https://assets.mixkit.co/videos/preview/mixkit-man-exercising-alone-in-a-gym-42897-large.mp4',
-  'Bicep Curl': 'https://assets.mixkit.co/videos/preview/mixkit-young-woman-training-with-dumbbells-in-a-gym-23964-large.mp4',
-  'Tricep Extension': 'https://assets.mixkit.co/videos/preview/mixkit-trainer-helping-man-to-exercise-correctly-in-the-gym-37006-large.mp4',
-  'Squat': 'https://assets.mixkit.co/videos/preview/mixkit-woman-lifting-weights-in-a-gym-23966-large.mp4',
-  'Deadlift': 'https://assets.mixkit.co/videos/preview/mixkit-man-exercising-in-a-gym-with-dumbbells-23476-large.mp4',
-  'Lunge': 'https://assets.mixkit.co/videos/preview/mixkit-trainer-guiding-woman-while-working-out-in-the-gym-40340-large.mp4',
-  'Leg Press': 'https://assets.mixkit.co/videos/preview/mixkit-woman-lifting-weights-in-a-gym-23966-large.mp4',
-  'Plank': 'https://assets.mixkit.co/videos/preview/mixkit-woman-doing-exercises-on-a-mat-in-the-gym-23964-large.mp4',
-  'Sit-up': 'https://assets.mixkit.co/videos/preview/mixkit-woman-exercising-on-a-mat-40341-large.mp4',
-  'Russian Twist': 'https://assets.mixkit.co/videos/preview/mixkit-woman-doing-exercises-on-a-mat-in-the-gym-23970-large.mp4',
-  'Burpee': 'https://assets.mixkit.co/videos/preview/mixkit-man-exercising-in-a-gym-23478-large.mp4',
-  'Clean and Jerk': 'https://assets.mixkit.co/videos/preview/mixkit-man-exercising-in-a-gym-23472-large.mp4',
-  'Lat Pulldown': 'https://assets.mixkit.co/videos/preview/mixkit-woman-exercising-on-a-machine-at-the-gym-40329-large.mp4',
-  'Cable Row': 'https://assets.mixkit.co/videos/preview/mixkit-trainer-helping-woman-use-machine-at-the-gym-40330-large.mp4',
-  'Leg Extension': 'https://assets.mixkit.co/videos/preview/mixkit-trainer-guiding-woman-while-working-out-in-the-gym-40340-large.mp4',
+  'Bench Press': 'https://dl8.webmfiles.org/big-buck-bunny_trailer.webm',
+  'Push-up': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+  'Shoulder Press': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+  'Pull-up': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+  'Bicep Curl': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+  'Tricep Extension': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+  'Squat': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+  'Deadlift': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
+  'Lunge': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+  'Leg Press': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
+  'Plank': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4',
+  'Sit-up': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4',
+  'Russian Twist': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+  'Burpee': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+  'Clean and Jerk': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+  'Lat Pulldown': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+  'Cable Row': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+  'Leg Extension': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
 };
 
-// Thumbnails for previews - use first frame of videos
+// Thumbnails for previews
 const exerciseThumbnails = {
   'Bench Press': 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
   'Push-up': 'https://images.unsplash.com/photo-1598971639058-fab3c3109a00?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
@@ -64,8 +64,10 @@ const FormLibrary = () => {
   const [isPlaying, setIsPlaying] = useState<number | null>(null);
   const [isMuted, setIsMuted] = useState(true);
   const videoRefs = useRef<{[key: string]: HTMLVideoElement | null}>({});
+  const [videoLoadErrors, setVideoLoadErrors] = useState<{[key: string]: boolean}>({});
+  const [playButtonVisible, setPlayButtonVisible] = useState<{[key: string]: boolean}>({});
   
-  // Mock library data with videos instead of images
+  // Mock library data with videos
   const libraryData = {
     'upper-body': [
       { id: 1, title: 'Bench Press', difficulty: 'intermediate', video: exerciseVideos['Bench Press'], thumbnail: exerciseThumbnails['Bench Press'] },
@@ -103,7 +105,31 @@ const FormLibrary = () => {
   // Selected exercise state
   const [selectedExercise, setSelectedExercise] = useState<number | null>(null);
   
-  // Handle video play/pause
+  // Handle video errors
+  const handleVideoError = (videoId: number | string) => {
+    console.error(`Video error for ID: ${videoId}`);
+    setVideoLoadErrors(prev => ({...prev, [videoId]: true}));
+    
+    toast({
+      title: "Video Error",
+      description: "There was a problem loading the video. Trying fallback source...",
+      variant: "destructive",
+    });
+    
+    // Set fallback video source
+    const videoElement = videoRefs.current[`video-${videoId}`];
+    if (videoElement) {
+      videoElement.src = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+    }
+  };
+  
+  // Handle video loaded
+  const handleVideoLoaded = (videoId: number | string) => {
+    setVideoLoadErrors(prev => ({...prev, [videoId]: false}));
+    setPlayButtonVisible(prev => ({...prev, [videoId]: true}));
+  };
+  
+  // Handle video play/pause with better error handling
   const togglePlayPause = (videoId: number) => {
     if (isPlaying === videoId) {
       // Pause current video
@@ -124,9 +150,23 @@ const FormLibrary = () => {
       // Play new video
       const videoElement = videoRefs.current[`video-${videoId}`];
       if (videoElement) {
-        videoElement.play();
+        const playPromise = videoElement.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setIsPlaying(videoId);
+            })
+            .catch(error => {
+              console.error("Video play error:", error);
+              toast({
+                title: "Playback Error",
+                description: "Could not play the video. Please try again.",
+                variant: "destructive",
+              });
+            });
+        }
       }
-      setIsPlaying(videoId);
     }
   };
   
@@ -150,6 +190,50 @@ const FormLibrary = () => {
     });
   };
   
+  // Pre-load videos for better performance
+  useEffect(() => {
+    const preloadVideos = () => {
+      Object.entries(exerciseVideos).forEach(([key, url]) => {
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+        video.src = url;
+        
+        video.onloadedmetadata = () => {
+          console.log(`Video metadata loaded for ${key}`);
+        };
+        
+        video.onerror = () => {
+          console.error(`Error preloading video for ${key}`);
+        };
+      });
+    };
+    
+    preloadVideos();
+  }, []);
+  
+  // Reset playing state when changing categories
+  useEffect(() => {
+    setIsPlaying(null);
+  }, [activeCategory]);
+  
+  // Force reload videos that failed to load on first attempt
+  useEffect(() => {
+    const retryFailedVideos = () => {
+      Object.entries(videoLoadErrors).forEach(([key, hasError]) => {
+        if (hasError) {
+          const videoId = key.replace('video-', '');
+          const videoElement = videoRefs.current[`video-${videoId}`];
+          if (videoElement) {
+            videoElement.load();
+          }
+        }
+      });
+    };
+    
+    const timeoutId = setTimeout(retryFailedVideos, 3000);
+    return () => clearTimeout(timeoutId);
+  }, [videoLoadErrors]);
+  
   const handleSubmitRequest = () => {
     if (requestExercise.trim()) {
       const newExerciseId = Math.max(...Object.values(libraryData).flatMap(exercises => exercises.map(ex => ex.id))) + 1;
@@ -158,7 +242,8 @@ const FormLibrary = () => {
         id: newExerciseId,
         title: requestExercise,
         difficulty: 'custom',
-        video: 'https://assets.mixkit.co/videos/preview/mixkit-man-exercising-in-a-gym-23478-large.mp4', // Default video
+        // Use a reliable video source for custom exercises
+        video: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
         thumbnail: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80'
       };
       
@@ -219,7 +304,7 @@ const FormLibrary = () => {
             </TabsList>
           </div>
           
-          {/* All categories share the same layout, so we'll use one content area */}
+          {/* All categories share the same layout */}
           {Object.keys(libraryData).map(category => (
             <TabsContent key={category} value={category} className="mt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -231,6 +316,12 @@ const FormLibrary = () => {
                         <div 
                           className="aspect-video bg-muted relative cursor-pointer"
                         >
+                          {videoLoadErrors[exercise.id] && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-muted z-10">
+                              <p className="text-sm text-muted-foreground">Video unavailable</p>
+                            </div>
+                          )}
+                          
                           <video
                             ref={el => videoRefs.current[`video-${exercise.id}`] = el}
                             src={exercise.video}
@@ -238,7 +329,10 @@ const FormLibrary = () => {
                             className="w-full h-full object-cover"
                             loop
                             muted={isMuted}
+                            preload="metadata"
                             onClick={() => togglePlayPause(exercise.id)}
+                            onError={() => handleVideoError(exercise.id)}
+                            onLoadedMetadata={() => handleVideoLoaded(exercise.id)}
                           />
                           
                           <div className="absolute top-2 right-2">
@@ -266,7 +360,7 @@ const FormLibrary = () => {
                             <Button
                               variant="secondary"
                               size="icon"
-                              className="bg-black/50 hover:bg-black/70 text-white transition-opacity opacity-0 hover:opacity-100"
+                              className={`bg-black/50 hover:bg-black/70 text-white transition-opacity ${isPlaying === exercise.id ? 'opacity-0 hover:opacity-100' : 'opacity-100'}`}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 togglePlayPause(exercise.id);
@@ -342,6 +436,13 @@ const FormLibrary = () => {
                         controls
                         autoPlay
                         muted={isMuted}
+                        onError={() => {
+                          // Use a reliable fallback video
+                          const videoElement = videoRefs.current[`video-detail-${selectedExercise}`];
+                          if (videoElement) {
+                            videoElement.src = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+                          }
+                        }}
                       />
                       
                       <div className="absolute top-4 right-4 flex space-x-2">
@@ -435,6 +536,12 @@ const FormLibrary = () => {
                       <div 
                         className="aspect-video bg-muted relative cursor-pointer"
                       >
+                        {videoLoadErrors[exercise.id] && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-muted z-10">
+                            <p className="text-sm text-muted-foreground">Video unavailable</p>
+                          </div>
+                        )}
+                        
                         <video
                           ref={el => videoRefs.current[`video-${exercise.id}`] = el}
                           src={exercise.video}
@@ -442,7 +549,10 @@ const FormLibrary = () => {
                           className="w-full h-full object-cover"
                           loop
                           muted={isMuted}
+                          preload="metadata"
                           onClick={() => togglePlayPause(exercise.id)}
+                          onError={() => handleVideoError(exercise.id)}
+                          onLoadedMetadata={() => handleVideoLoaded(exercise.id)}
                         />
                         
                         <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
@@ -466,7 +576,7 @@ const FormLibrary = () => {
                           <Button
                             variant="secondary"
                             size="icon"
-                            className="bg-black/50 hover:bg-black/70 text-white transition-opacity opacity-0 hover:opacity-100"
+                            className={`bg-black/50 hover:bg-black/70 text-white transition-opacity ${isPlaying === exercise.id ? 'opacity-0 hover:opacity-100' : 'opacity-100'}`}
                             onClick={(e) => {
                               e.stopPropagation();
                               togglePlayPause(exercise.id);
