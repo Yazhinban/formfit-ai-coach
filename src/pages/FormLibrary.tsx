@@ -13,8 +13,30 @@ import { toast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
-// Sample exercise images
-const exerciseImages = {
+// Sample exercise videos - replace images with video URLs
+const exerciseVideos = {
+  'Bench Press': 'https://storage.googleapis.com/webfundamentals-assets/videos/chrome.mp4',
+  'Push-up': 'https://assets.mixkit.co/videos/preview/mixkit-man-exercising-in-a-gym-23478-large.mp4',
+  'Shoulder Press': 'https://assets.mixkit.co/videos/preview/mixkit-woman-at-the-gym-performing-shoulder-presses-40342-large.mp4',
+  'Pull-up': 'https://assets.mixkit.co/videos/preview/mixkit-man-exercising-alone-in-a-gym-42897-large.mp4',
+  'Bicep Curl': 'https://assets.mixkit.co/videos/preview/mixkit-young-woman-training-with-dumbbells-in-a-gym-23964-large.mp4',
+  'Tricep Extension': 'https://assets.mixkit.co/videos/preview/mixkit-trainer-helping-man-to-exercise-correctly-in-the-gym-37006-large.mp4',
+  'Squat': 'https://assets.mixkit.co/videos/preview/mixkit-woman-lifting-weights-in-a-gym-23966-large.mp4',
+  'Deadlift': 'https://assets.mixkit.co/videos/preview/mixkit-man-exercising-in-a-gym-with-dumbbells-23476-large.mp4',
+  'Lunge': 'https://assets.mixkit.co/videos/preview/mixkit-trainer-guiding-woman-while-working-out-in-the-gym-40340-large.mp4',
+  'Leg Press': 'https://assets.mixkit.co/videos/preview/mixkit-woman-lifting-weights-in-a-gym-23966-large.mp4',
+  'Plank': 'https://assets.mixkit.co/videos/preview/mixkit-woman-doing-exercises-on-a-mat-in-the-gym-23964-large.mp4',
+  'Sit-up': 'https://assets.mixkit.co/videos/preview/mixkit-woman-exercising-on-a-mat-40341-large.mp4',
+  'Russian Twist': 'https://assets.mixkit.co/videos/preview/mixkit-woman-doing-exercises-on-a-mat-in-the-gym-23970-large.mp4',
+  'Burpee': 'https://assets.mixkit.co/videos/preview/mixkit-man-exercising-in-a-gym-23478-large.mp4',
+  'Clean and Jerk': 'https://assets.mixkit.co/videos/preview/mixkit-man-exercising-in-a-gym-23472-large.mp4',
+  'Lat Pulldown': 'https://assets.mixkit.co/videos/preview/mixkit-woman-exercising-on-a-machine-at-the-gym-40329-large.mp4',
+  'Cable Row': 'https://assets.mixkit.co/videos/preview/mixkit-trainer-helping-woman-use-machine-at-the-gym-40330-large.mp4',
+  'Leg Extension': 'https://assets.mixkit.co/videos/preview/mixkit-trainer-guiding-woman-while-working-out-in-the-gym-40340-large.mp4',
+};
+
+// Thumbnails for previews - use first frame of videos
+const exerciseThumbnails = {
   'Bench Press': 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
   'Push-up': 'https://images.unsplash.com/photo-1598971639058-fab3c3109a00?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
   'Shoulder Press': 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80',
@@ -38,37 +60,40 @@ const exerciseImages = {
 const FormLibrary = () => {
   const [activeCategory, setActiveCategory] = useState('upper-body');
   const [requestExercise, setRequestExercise] = useState('');
-  const [requestedExercises, setRequestedExercises] = useState<Array<{id: number, title: string, difficulty: string, image: string}>>([]);
+  const [requestedExercises, setRequestedExercises] = useState<Array<{id: number, title: string, difficulty: string, video: string, thumbnail: string}>>([]);
+  const [isPlaying, setIsPlaying] = useState<number | null>(null);
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRefs = useRef<{[key: string]: HTMLVideoElement | null}>({});
   
-  // Mock library data with images instead of videos
+  // Mock library data with videos instead of images
   const libraryData = {
     'upper-body': [
-      { id: 1, title: 'Bench Press', difficulty: 'intermediate', image: exerciseImages['Bench Press'] },
-      { id: 2, title: 'Push-up', difficulty: 'beginner', image: exerciseImages['Push-up'] },
-      { id: 3, title: 'Shoulder Press', difficulty: 'intermediate', image: exerciseImages['Shoulder Press'] },
-      { id: 4, title: 'Pull-up', difficulty: 'advanced', image: exerciseImages['Pull-up'] },
-      { id: 5, title: 'Bicep Curl', difficulty: 'beginner', image: exerciseImages['Bicep Curl'] },
-      { id: 6, title: 'Tricep Extension', difficulty: 'beginner', image: exerciseImages['Tricep Extension'] },
+      { id: 1, title: 'Bench Press', difficulty: 'intermediate', video: exerciseVideos['Bench Press'], thumbnail: exerciseThumbnails['Bench Press'] },
+      { id: 2, title: 'Push-up', difficulty: 'beginner', video: exerciseVideos['Push-up'], thumbnail: exerciseThumbnails['Push-up'] },
+      { id: 3, title: 'Shoulder Press', difficulty: 'intermediate', video: exerciseVideos['Shoulder Press'], thumbnail: exerciseThumbnails['Shoulder Press'] },
+      { id: 4, title: 'Pull-up', difficulty: 'advanced', video: exerciseVideos['Pull-up'], thumbnail: exerciseThumbnails['Pull-up'] },
+      { id: 5, title: 'Bicep Curl', difficulty: 'beginner', video: exerciseVideos['Bicep Curl'], thumbnail: exerciseThumbnails['Bicep Curl'] },
+      { id: 6, title: 'Tricep Extension', difficulty: 'beginner', video: exerciseVideos['Tricep Extension'], thumbnail: exerciseThumbnails['Tricep Extension'] },
     ],
     'lower-body': [
-      { id: 7, title: 'Squat', difficulty: 'intermediate', image: exerciseImages['Squat'] },
-      { id: 8, title: 'Deadlift', difficulty: 'advanced', image: exerciseImages['Deadlift'] },
-      { id: 9, title: 'Lunge', difficulty: 'beginner', image: exerciseImages['Lunge'] },
-      { id: 10, title: 'Leg Press', difficulty: 'intermediate', image: exerciseImages['Leg Press'] },
+      { id: 7, title: 'Squat', difficulty: 'intermediate', video: exerciseVideos['Squat'], thumbnail: exerciseThumbnails['Squat'] },
+      { id: 8, title: 'Deadlift', difficulty: 'advanced', video: exerciseVideos['Deadlift'], thumbnail: exerciseThumbnails['Deadlift'] },
+      { id: 9, title: 'Lunge', difficulty: 'beginner', video: exerciseVideos['Lunge'], thumbnail: exerciseThumbnails['Lunge'] },
+      { id: 10, title: 'Leg Press', difficulty: 'intermediate', video: exerciseVideos['Leg Press'], thumbnail: exerciseThumbnails['Leg Press'] },
     ],
     'core': [
-      { id: 11, title: 'Plank', difficulty: 'beginner', image: exerciseImages['Plank'] },
-      { id: 12, title: 'Sit-up', difficulty: 'beginner', image: exerciseImages['Sit-up'] },
-      { id: 13, title: 'Russian Twist', difficulty: 'intermediate', image: exerciseImages['Russian Twist'] },
+      { id: 11, title: 'Plank', difficulty: 'beginner', video: exerciseVideos['Plank'], thumbnail: exerciseThumbnails['Plank'] },
+      { id: 12, title: 'Sit-up', difficulty: 'beginner', video: exerciseVideos['Sit-up'], thumbnail: exerciseThumbnails['Sit-up'] },
+      { id: 13, title: 'Russian Twist', difficulty: 'intermediate', video: exerciseVideos['Russian Twist'], thumbnail: exerciseThumbnails['Russian Twist'] },
     ],
     'full-body': [
-      { id: 14, title: 'Burpee', difficulty: 'advanced', image: exerciseImages['Burpee'] },
-      { id: 15, title: 'Clean and Jerk', difficulty: 'advanced', image: exerciseImages['Clean and Jerk'] },
+      { id: 14, title: 'Burpee', difficulty: 'advanced', video: exerciseVideos['Burpee'], thumbnail: exerciseThumbnails['Burpee'] },
+      { id: 15, title: 'Clean and Jerk', difficulty: 'advanced', video: exerciseVideos['Clean and Jerk'], thumbnail: exerciseThumbnails['Clean and Jerk'] },
     ],
     'gym-exercises': [
-      { id: 16, title: 'Lat Pulldown', difficulty: 'intermediate', image: exerciseImages['Lat Pulldown'] },
-      { id: 17, title: 'Cable Row', difficulty: 'intermediate', image: exerciseImages['Cable Row'] },
-      { id: 18, title: 'Leg Extension', difficulty: 'beginner', image: exerciseImages['Leg Extension'] },
+      { id: 16, title: 'Lat Pulldown', difficulty: 'intermediate', video: exerciseVideos['Lat Pulldown'], thumbnail: exerciseThumbnails['Lat Pulldown'] },
+      { id: 17, title: 'Cable Row', difficulty: 'intermediate', video: exerciseVideos['Cable Row'], thumbnail: exerciseThumbnails['Cable Row'] },
+      { id: 18, title: 'Leg Extension', difficulty: 'beginner', video: exerciseVideos['Leg Extension'], thumbnail: exerciseThumbnails['Leg Extension'] },
     ],
   };
   
@@ -77,6 +102,44 @@ const FormLibrary = () => {
   
   // Selected exercise state
   const [selectedExercise, setSelectedExercise] = useState<number | null>(null);
+  
+  // Handle video play/pause
+  const togglePlayPause = (videoId: number) => {
+    if (isPlaying === videoId) {
+      // Pause current video
+      const videoElement = videoRefs.current[`video-${videoId}`];
+      if (videoElement) {
+        videoElement.pause();
+      }
+      setIsPlaying(null);
+    } else {
+      // Pause any playing video
+      if (isPlaying !== null) {
+        const prevVideoElement = videoRefs.current[`video-${isPlaying}`];
+        if (prevVideoElement) {
+          prevVideoElement.pause();
+        }
+      }
+      
+      // Play new video
+      const videoElement = videoRefs.current[`video-${videoId}`];
+      if (videoElement) {
+        videoElement.play();
+      }
+      setIsPlaying(videoId);
+    }
+  };
+  
+  // Handle mute toggle
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+    // Apply to all video refs
+    Object.values(videoRefs.current).forEach(video => {
+      if (video) {
+        video.muted = !isMuted;
+      }
+    });
+  };
   
   const handleExerciseSelect = (exerciseId: number) => {
     setSelectedExercise(exerciseId);
@@ -95,7 +158,8 @@ const FormLibrary = () => {
         id: newExerciseId,
         title: requestExercise,
         difficulty: 'custom',
-        image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80'
+        video: 'https://assets.mixkit.co/videos/preview/mixkit-man-exercising-in-a-gym-23478-large.mp4', // Default video
+        thumbnail: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80'
       };
       
       setRequestedExercises(prev => [newRequestedExercise, ...prev]);
@@ -166,19 +230,53 @@ const FormLibrary = () => {
                       <Card key={`requested-${exercise.id}`} className="overflow-hidden hover:shadow-md transition-shadow border-primary/20">
                         <div 
                           className="aspect-video bg-muted relative cursor-pointer"
-                          onClick={() => handleExerciseSelect(exercise.id)}
                         >
-                          <img 
-                            src={exercise.image} 
-                            alt={exercise.title} 
+                          <video
+                            ref={el => videoRefs.current[`video-${exercise.id}`] = el}
+                            src={exercise.video}
+                            poster={exercise.thumbnail}
                             className="w-full h-full object-cover"
+                            loop
+                            muted={isMuted}
+                            onClick={() => togglePlayPause(exercise.id)}
                           />
+                          
                           <div className="absolute top-2 right-2">
                             <Badge variant="secondary" className="bg-primary/20">Requested</Badge>
                           </div>
+                          
                           <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                            <Button variant="secondary" size="icon">
+                            <Button 
+                              variant="secondary" 
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleExerciseSelect(exercise.id);
+                              }}
+                            >
                               <Info className="h-6 w-6" />
+                            </Button>
+                          </div>
+                          
+                          {/* Play/Pause Button Overlay */}
+                          <div
+                            className="absolute inset-0 flex items-center justify-center"
+                            onClick={() => togglePlayPause(exercise.id)}
+                          >
+                            <Button
+                              variant="secondary"
+                              size="icon"
+                              className="bg-black/50 hover:bg-black/70 text-white transition-opacity opacity-0 hover:opacity-100"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                togglePlayPause(exercise.id);
+                              }}
+                            >
+                              {isPlaying === exercise.id ? (
+                                <Pause className="h-6 w-6" />
+                              ) : (
+                                <Play className="h-6 w-6" />
+                              )}
                             </Button>
                           </div>
                         </div>
@@ -195,14 +293,30 @@ const FormLibrary = () => {
                           </div>
                         </CardContent>
                         
-                        <CardFooter className="px-4 pb-4 pt-0">
+                        <CardFooter className="px-4 pb-4 pt-0 flex justify-between">
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="w-full"
+                            className="flex-1 mr-2"
                             onClick={() => handleExerciseSelect(exercise.id)}
                           >
                             <Info className="h-4 w-4 mr-1" /> View Details
+                          </Button>
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-none"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleMute();
+                            }}
+                          >
+                            {isMuted ? (
+                              <VolumeX className="h-4 w-4" />
+                            ) : (
+                              <Volume2 className="h-4 w-4" />
+                            )}
                           </Button>
                         </CardFooter>
                       </Card>
@@ -214,17 +328,32 @@ const FormLibrary = () => {
                   // Exercise details view
                   <div className="col-span-full bg-muted rounded-lg overflow-hidden">
                     <div className="aspect-video relative">
-                      <img 
+                      <video 
+                        ref={el => videoRefs.current[`video-detail-${selectedExercise}`] = el}
                         src={
-                          requestedExercises.find(ex => ex.id === selectedExercise)?.image || 
-                          activeExercises.find(ex => ex.id === selectedExercise)?.image
+                          requestedExercises.find(ex => ex.id === selectedExercise)?.video || 
+                          activeExercises.find(ex => ex.id === selectedExercise)?.video
                         } 
-                        alt={
-                          requestedExercises.find(ex => ex.id === selectedExercise)?.title || 
-                          activeExercises.find(ex => ex.id === selectedExercise)?.title
+                        poster={
+                          requestedExercises.find(ex => ex.id === selectedExercise)?.thumbnail || 
+                          activeExercises.find(ex => ex.id === selectedExercise)?.thumbnail
                         }
                         className="w-full h-full object-cover"
+                        controls
+                        autoPlay
+                        muted={isMuted}
                       />
+                      
+                      <div className="absolute top-4 right-4 flex space-x-2">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="bg-black/50 text-white"
+                          onClick={toggleMute}
+                        >
+                          {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                        </Button>
+                      </div>
                     </div>
                     
                     <div className="p-4">
@@ -305,16 +434,49 @@ const FormLibrary = () => {
                     <Card key={exercise.id} className="overflow-hidden hover:shadow-md transition-shadow">
                       <div 
                         className="aspect-video bg-muted relative cursor-pointer"
-                        onClick={() => handleExerciseSelect(exercise.id)}
                       >
-                        <img 
-                          src={exercise.image} 
-                          alt={exercise.title} 
+                        <video
+                          ref={el => videoRefs.current[`video-${exercise.id}`] = el}
+                          src={exercise.video}
+                          poster={exercise.thumbnail}
                           className="w-full h-full object-cover"
+                          loop
+                          muted={isMuted}
+                          onClick={() => togglePlayPause(exercise.id)}
                         />
+                        
                         <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                          <Button variant="secondary" size="icon">
+                          <Button 
+                            variant="secondary" 
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleExerciseSelect(exercise.id);
+                            }}
+                          >
                             <Info className="h-6 w-6" />
+                          </Button>
+                        </div>
+                        
+                        {/* Play/Pause Button Overlay */}
+                        <div
+                          className="absolute inset-0 flex items-center justify-center"
+                          onClick={() => togglePlayPause(exercise.id)}
+                        >
+                          <Button
+                            variant="secondary"
+                            size="icon"
+                            className="bg-black/50 hover:bg-black/70 text-white transition-opacity opacity-0 hover:opacity-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              togglePlayPause(exercise.id);
+                            }}
+                          >
+                            {isPlaying === exercise.id ? (
+                              <Pause className="h-6 w-6" />
+                            ) : (
+                              <Play className="h-6 w-6" />
+                            )}
                           </Button>
                         </div>
                       </div>
@@ -335,14 +497,30 @@ const FormLibrary = () => {
                         </div>
                       </CardContent>
                       
-                      <CardFooter className="px-4 pb-4 pt-0">
+                      <CardFooter className="px-4 pb-4 pt-0 flex justify-between">
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="w-full"
+                          className="flex-1 mr-2"
                           onClick={() => handleExerciseSelect(exercise.id)}
                         >
                           <Info className="h-4 w-4 mr-1" /> View Details
+                        </Button>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-none"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleMute();
+                          }}
+                        >
+                          {isMuted ? (
+                            <VolumeX className="h-4 w-4" />
+                          ) : (
+                            <Volume2 className="h-4 w-4" />
+                          )}
                         </Button>
                       </CardFooter>
                     </Card>
