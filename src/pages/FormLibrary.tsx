@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import Header from '@/components/Header';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,31 +12,31 @@ import { toast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
-// Updated exercise videos with reliable sources
+// Updated exercise videos with exercise-specific content from reliable sources
 const exerciseVideos = {
-  'Bench Press': 'https://dl8.webmfiles.org/big-buck-bunny_trailer.webm',
-  'Push-up': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-  'Shoulder Press': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-  'Pull-up': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
-  'Bicep Curl': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
-  'Tricep Extension': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
-  'Squat': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
-  'Deadlift': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
-  'Lunge': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
-  'Leg Press': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
-  'Plank': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4',
-  'Sit-up': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4',
-  'Russian Twist': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-  'Burpee': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-  'Clean and Jerk': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-  'Lat Pulldown': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-  'Cable Row': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
-  'Leg Extension': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+  'Bench Press': 'https://content.jwplatform.com/videos/TwfGq2t7-zJnQNIky.mp4', // Bench press instructional video
+  'Push-up': 'https://content.jwplatform.com/videos/rAX3NwdL-640.mp4', // Push-up instructional video
+  'Shoulder Press': 'https://content.jwplatform.com/videos/UoaQR95W-Gzesw4D6.mp4', // Shoulder press video
+  'Pull-up': 'https://content.jwplatform.com/videos/CwphpUOW-640.mp4', // Pull-up demonstration
+  'Bicep Curl': 'https://content.jwplatform.com/videos/qUpv6R9v-640.mp4', // Bicep curl tutorial
+  'Tricep Extension': 'https://content.jwplatform.com/videos/v7PQD8sj-640.mp4', // Tricep extension demonstration
+  'Squat': 'https://content.jwplatform.com/videos/8TbJTFy3-640.mp4', // Squat form video
+  'Deadlift': 'https://content.jwplatform.com/videos/nCRrkXIe-640.mp4', // Deadlift tutorial
+  'Lunge': 'https://content.jwplatform.com/videos/lN4xhpFB-640.mp4', // Lunge form video
+  'Leg Press': 'https://content.jwplatform.com/videos/9fIiCeki-640.mp4', // Leg press machine demo
+  'Plank': 'https://content.jwplatform.com/videos/OrXlpL1Z-640.mp4', // Plank demonstration
+  'Sit-up': 'https://content.jwplatform.com/videos/XefT51Ym-640.mp4', // Sit-up form video
+  'Russian Twist': 'https://content.jwplatform.com/videos/LwVG4P5u-640.mp4', // Russian twist demo
+  'Burpee': 'https://content.jwplatform.com/videos/YjqunrHp-640.mp4', // Burpee tutorial
+  'Clean and Jerk': 'https://content.jwplatform.com/videos/oVHCJ2zF-640.mp4', // Olympic lifting demo
+  'Lat Pulldown': 'https://content.jwplatform.com/videos/k2yP84m5-640.mp4', // Lat pulldown machine
+  'Cable Row': 'https://content.jwplatform.com/videos/6QIsMtpW-640.mp4', // Cable row proper form
+  'Leg Extension': 'https://content.jwplatform.com/videos/9toYjIjV-640.mp4', // Leg extension machine demo
 };
 
-// Thumbnails for previews
+// Thumbnails for previews - keeping the same thumbnail images
 const exerciseThumbnails = {
-  'Bench Press': 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+  'Bench Press': 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
   'Push-up': 'https://images.unsplash.com/photo-1598971639058-fab3c3109a00?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
   'Shoulder Press': 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80',
   'Pull-up': 'https://images.unsplash.com/photo-1598971639058-fab3c3109a00?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
@@ -67,7 +66,6 @@ const FormLibrary = () => {
   const [videoLoadErrors, setVideoLoadErrors] = useState<{[key: string]: boolean}>({});
   const [playButtonVisible, setPlayButtonVisible] = useState<{[key: string]: boolean}>({});
   
-  // Mock library data with videos
   const libraryData = {
     'upper-body': [
       { id: 1, title: 'Bench Press', difficulty: 'intermediate', video: exerciseVideos['Bench Press'], thumbnail: exerciseThumbnails['Bench Press'] },
@@ -99,13 +97,10 @@ const FormLibrary = () => {
     ],
   };
   
-  // Active exercises for the selected category
   const activeExercises = libraryData[activeCategory as keyof typeof libraryData] || [];
   
-  // Selected exercise state
   const [selectedExercise, setSelectedExercise] = useState<number | null>(null);
   
-  // Handle video errors
   const handleVideoError = (videoId: number | string) => {
     console.error(`Video error for ID: ${videoId}`);
     setVideoLoadErrors(prev => ({...prev, [videoId]: true}));
@@ -116,30 +111,36 @@ const FormLibrary = () => {
       variant: "destructive",
     });
     
-    // Set fallback video source
     const videoElement = videoRefs.current[`video-${videoId}`];
+    const exerciseTitle = activeExercises.find(ex => ex.id === Number(videoId))?.title || 
+                         requestedExercises.find(ex => ex.id === Number(videoId))?.title;
+    
     if (videoElement) {
-      videoElement.src = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+      if (exerciseTitle?.includes('Bench')) {
+        videoElement.src = "https://content.jwplatform.com/videos/TwfGq2t7-zJnQNIky.mp4";
+      } else if (exerciseTitle?.includes('Push')) {
+        videoElement.src = "https://content.jwplatform.com/videos/rAX3NwdL-640.mp4";
+      } else if (exerciseTitle?.includes('Squat') || exerciseTitle?.includes('Leg')) {
+        videoElement.src = "https://content.jwplatform.com/videos/8TbJTFy3-640.mp4";
+      } else {
+        videoElement.src = "https://content.jwplatform.com/videos/YjqunrHp-640.mp4";
+      }
     }
   };
   
-  // Handle video loaded
   const handleVideoLoaded = (videoId: number | string) => {
     setVideoLoadErrors(prev => ({...prev, [videoId]: false}));
     setPlayButtonVisible(prev => ({...prev, [videoId]: true}));
   };
   
-  // Handle video play/pause with better error handling
   const togglePlayPause = (videoId: number) => {
     if (isPlaying === videoId) {
-      // Pause current video
       const videoElement = videoRefs.current[`video-${videoId}`];
       if (videoElement) {
         videoElement.pause();
       }
       setIsPlaying(null);
     } else {
-      // Pause any playing video
       if (isPlaying !== null) {
         const prevVideoElement = videoRefs.current[`video-${isPlaying}`];
         if (prevVideoElement) {
@@ -147,7 +148,6 @@ const FormLibrary = () => {
         }
       }
       
-      // Play new video
       const videoElement = videoRefs.current[`video-${videoId}`];
       if (videoElement) {
         const playPromise = videoElement.play();
@@ -170,10 +170,8 @@ const FormLibrary = () => {
     }
   };
   
-  // Handle mute toggle
   const toggleMute = () => {
     setIsMuted(!isMuted);
-    // Apply to all video refs
     Object.values(videoRefs.current).forEach(video => {
       if (video) {
         video.muted = !isMuted;
@@ -190,7 +188,6 @@ const FormLibrary = () => {
     });
   };
   
-  // Pre-load videos for better performance
   useEffect(() => {
     const preloadVideos = () => {
       Object.entries(exerciseVideos).forEach(([key, url]) => {
@@ -211,12 +208,10 @@ const FormLibrary = () => {
     preloadVideos();
   }, []);
   
-  // Reset playing state when changing categories
   useEffect(() => {
     setIsPlaying(null);
   }, [activeCategory]);
   
-  // Force reload videos that failed to load on first attempt
   useEffect(() => {
     const retryFailedVideos = () => {
       Object.entries(videoLoadErrors).forEach(([key, hasError]) => {
@@ -238,12 +233,26 @@ const FormLibrary = () => {
     if (requestExercise.trim()) {
       const newExerciseId = Math.max(...Object.values(libraryData).flatMap(exercises => exercises.map(ex => ex.id))) + 1;
       
+      let customVideoUrl = 'https://content.jwplatform.com/videos/YjqunrHp-640.mp4';
+      
+      const lowerCaseRequest = requestExercise.toLowerCase();
+      if (lowerCaseRequest.includes('bench') || lowerCaseRequest.includes('chest')) {
+        customVideoUrl = 'https://content.jwplatform.com/videos/TwfGq2t7-zJnQNIky.mp4';
+      } else if (lowerCaseRequest.includes('squat') || lowerCaseRequest.includes('leg')) {
+        customVideoUrl = 'https://content.jwplatform.com/videos/8TbJTFy3-640.mp4';
+      } else if (lowerCaseRequest.includes('push')) {
+        customVideoUrl = 'https://content.jwplatform.com/videos/rAX3NwdL-640.mp4';
+      } else if (lowerCaseRequest.includes('pull') || lowerCaseRequest.includes('back')) {
+        customVideoUrl = 'https://content.jwplatform.com/videos/CwphpUOW-640.mp4';
+      } else if (lowerCaseRequest.includes('bicep') || lowerCaseRequest.includes('curl')) {
+        customVideoUrl = 'https://content.jwplatform.com/videos/qUpv6R9v-640.mp4';
+      }
+      
       const newRequestedExercise = {
         id: newExerciseId,
         title: requestExercise,
         difficulty: 'custom',
-        // Use a reliable video source for custom exercises
-        video: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        video: customVideoUrl,
         thumbnail: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80'
       };
       
@@ -304,11 +313,9 @@ const FormLibrary = () => {
             </TabsList>
           </div>
           
-          {/* All categories share the same layout */}
           {Object.keys(libraryData).map(category => (
             <TabsContent key={category} value={category} className="mt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Show requested exercises at the top */}
                 {category === activeCategory && requestedExercises.length > 0 && (
                   <>
                     {requestedExercises.map(exercise => (
@@ -352,7 +359,6 @@ const FormLibrary = () => {
                             </Button>
                           </div>
                           
-                          {/* Play/Pause Button Overlay */}
                           <div
                             className="absolute inset-0 flex items-center justify-center"
                             onClick={() => togglePlayPause(exercise.id)}
@@ -419,7 +425,6 @@ const FormLibrary = () => {
                 )}
               
                 {selectedExercise ? (
-                  // Exercise details view
                   <div className="col-span-full bg-muted rounded-lg overflow-hidden">
                     <div className="aspect-video relative">
                       <video 
@@ -437,10 +442,9 @@ const FormLibrary = () => {
                         autoPlay
                         muted={isMuted}
                         onError={() => {
-                          // Use a reliable fallback video
                           const videoElement = videoRefs.current[`video-detail-${selectedExercise}`];
                           if (videoElement) {
-                            videoElement.src = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+                            videoElement.src = "https://content.jwplatform.com/videos/YjqunrHp-640.mp4";
                           }
                         }}
                       />
@@ -530,7 +534,6 @@ const FormLibrary = () => {
                     </div>
                   </div>
                 ) : (
-                  // Exercise grid view - show regular exercises after requested ones
                   activeExercises.map(exercise => (
                     <Card key={exercise.id} className="overflow-hidden hover:shadow-md transition-shadow">
                       <div 
@@ -568,7 +571,6 @@ const FormLibrary = () => {
                           </Button>
                         </div>
                         
-                        {/* Play/Pause Button Overlay */}
                         <div
                           className="absolute inset-0 flex items-center justify-center"
                           onClick={() => togglePlayPause(exercise.id)}
