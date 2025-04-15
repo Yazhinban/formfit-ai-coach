@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Upload, Camera, Video, Pause, RotateCcw, Timer, X, Check, Images } from 'lucide-react';
+import { Upload, Camera, Video, Pause, RotateCcw, Timer, X, Check, Images, SwitchCamera } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface VideoInputProps {
@@ -15,6 +15,7 @@ const VideoInput = ({ onVideoLoaded }: VideoInputProps) => {
   const [timerValue, setTimerValue] = useState<number | null>(null);
   const [countDown, setCountDown] = useState<number | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -46,8 +47,17 @@ const VideoInput = ({ onVideoLoaded }: VideoInputProps) => {
   const startCameraStream = async () => {
     try {
       const constraints = {
-        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
+        video: { 
+          facingMode: facingMode,
+          width: { ideal: 1280 }, 
+          height: { ideal: 720 } 
+        }
       };
+      
+      // Stop any existing stream
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
       
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = stream;
@@ -72,6 +82,17 @@ const VideoInput = ({ onVideoLoaded }: VideoInputProps) => {
         description: "Unable to access your camera. Please check your permissions.",
         variant: "destructive"
       });
+    }
+  };
+
+  const switchCamera = () => {
+    setFacingMode(prevMode => prevMode === 'user' ? 'environment' : 'user');
+    if (isLiveMode) {
+      toast({
+        title: "Switching Camera",
+        description: `Switching to ${facingMode === 'user' ? 'back' : 'front'} camera...`,
+      });
+      startCameraStream();
     }
   };
 
@@ -276,13 +297,21 @@ const VideoInput = ({ onVideoLoaded }: VideoInputProps) => {
               </Button>
             </div>
             
-            <Button
-              onClick={stopCameraStream}
-              variant="outline"
-              className="w-full sm:w-auto"
-            >
-              <X className="mr-2 h-4 w-4" /> Exit Camera
-            </Button>
+            <div className="w-full sm:w-auto flex gap-2">
+              <Button
+                onClick={switchCamera}
+                variant="outline"
+              >
+                <SwitchCamera className="mr-2 h-4 w-4" /> Switch Camera
+              </Button>
+              
+              <Button
+                onClick={stopCameraStream}
+                variant="outline"
+              >
+                <X className="mr-2 h-4 w-4" /> Exit Camera
+              </Button>
+            </div>
           </>
         ) : recordingState === 'recording' ? (
           <Button

@@ -1,13 +1,14 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
+import WorkoutDisplay from '@/components/WorkoutDisplay';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { UserRound, CalendarDays, Dumbbell, ChevronRight, VideoIcon, Plus } from 'lucide-react';
+import { UserRound, CalendarDays, Dumbbell, ChevronRight, VideoIcon, Plus, Save } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
 import { 
@@ -18,7 +19,14 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+
+// Define interface for workout
+interface WorkoutItem {
+  id: number;
+  day: string;
+  exercise: string;
+}
 
 const Index = () => {
   // Personal info state
@@ -43,17 +51,10 @@ const Index = () => {
 
   // Exercise plan state
   const [selectedDay, setSelectedDay] = useState("");
-  const [exercises, setExercises] = useState<Record<string, string[]>>({
-    monday: [],
-    tuesday: [],
-    wednesday: [],
-    thursday: [],
-    friday: [],
-    saturday: [],
-    sunday: []
-  });
   const [newExercise, setNewExercise] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [workouts, setWorkouts] = useState<WorkoutItem[]>([]);
+  const [workoutCounter, setWorkoutCounter] = useState(1);
 
   // Handle personal info changes
   const handlePersonalInfoChange = (field: string, value: string) => {
@@ -91,16 +92,30 @@ const Index = () => {
       return;
     }
 
-    setExercises(prev => ({
-      ...prev,
-      [selectedDay]: [...prev[selectedDay as keyof typeof prev], newExercise]
-    }));
+    // Add the new workout
+    const newWorkout: WorkoutItem = {
+      id: workoutCounter,
+      day: selectedDay,
+      exercise: newExercise
+    };
 
+    setWorkouts(prev => [...prev, newWorkout]);
+    setWorkoutCounter(prev => prev + 1);
     setNewExercise("");
     
     toast({
       title: "Exercise Added",
       description: `Added ${newExercise} to ${selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1)}'s workout.`,
+    });
+  };
+
+  // Handle deleting a workout
+  const handleDeleteWorkout = (id: number) => {
+    setWorkouts(prev => prev.filter(workout => workout.id !== id));
+    
+    toast({
+      title: "Workout Removed",
+      description: "The workout has been removed from your plan.",
     });
   };
 
@@ -232,9 +247,9 @@ const Index = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Day</TableHead>
+                    <TableHead className="w-[120px]">Day</TableHead>
                     <TableHead>Workout Type</TableHead>
-                    <TableHead className="text-right">Exercises</TableHead>
+                    <TableHead className="w-[150px] text-right">Exercises</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -272,6 +287,9 @@ const Index = () => {
                           <DialogContent>
                             <DialogHeader>
                               <DialogTitle>Add Exercises for {label}</DialogTitle>
+                              <DialogDescription>
+                                Enter specific exercises you want to do on {label}.
+                              </DialogDescription>
                             </DialogHeader>
                             <div className="grid gap-4 py-4">
                               <div className="flex items-end gap-2">
@@ -287,16 +305,29 @@ const Index = () => {
                                 <Button onClick={handleAddExercise}>Add</Button>
                               </div>
                               
-                              {exercises[day].length > 0 ? (
+                              {workouts.filter(w => w.day === day).length > 0 ? (
                                 <div>
                                   <Label>Current Exercises:</Label>
                                   <ul className="mt-2 space-y-1">
-                                    {exercises[day].map((exercise, index) => (
-                                      <li key={index} className="flex items-center gap-2">
-                                        <ChevronRight className="h-4 w-4 text-primary" />
-                                        <span>{exercise}</span>
-                                      </li>
-                                    ))}
+                                    {workouts
+                                      .filter(workout => workout.day === day)
+                                      .map((workout) => (
+                                        <li key={workout.id} className="flex items-center justify-between gap-2">
+                                          <div className="flex items-center gap-2">
+                                            <ChevronRight className="h-4 w-4 text-primary" />
+                                            <span>{workout.exercise}</span>
+                                          </div>
+                                          <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-7 w-7"
+                                            onClick={() => handleDeleteWorkout(workout.id)}
+                                          >
+                                            <Trash2 className="h-4 w-4" />
+                                          </Button>
+                                        </li>
+                                      ))
+                                    }
                                   </ul>
                                 </div>
                               ) : (
@@ -308,9 +339,9 @@ const Index = () => {
                           </DialogContent>
                         </Dialog>
                         
-                        {exercises[day].length > 0 && (
+                        {workouts.filter(w => w.day === day).length > 0 && (
                           <div className="text-sm text-muted-foreground mt-1">
-                            {exercises[day].length} exercise(s)
+                            {workouts.filter(w => w.day === day).length} exercise(s)
                           </div>
                         )}
                       </TableCell>
@@ -322,7 +353,7 @@ const Index = () => {
               <Separator className="my-4" />
               <div className="flex justify-end">
                 <Button onClick={handleSavePlan}>
-                  <Dumbbell className="h-4 w-4 mr-2" />
+                  <Save className="h-4 w-4 mr-2" />
                   Save Plan
                 </Button>
               </div>
@@ -330,7 +361,10 @@ const Index = () => {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Display all workouts in cards grouped by day */}
+        <WorkoutDisplay workouts={workouts} onDelete={handleDeleteWorkout} />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
           <Card>
             <CardHeader>
               <CardTitle>Workout Recommendations</CardTitle>
