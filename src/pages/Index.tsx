@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import WorkoutDisplay from '@/components/WorkoutDisplay';
@@ -8,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { UserRound, CalendarDays, Dumbbell, ChevronRight, VideoIcon, Plus, Save } from 'lucide-react';
+import { UserRound, CalendarDays, Dumbbell, ChevronRight, VideoIcon, Plus, Save, Trash2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
 import { 
@@ -21,7 +20,6 @@ import {
 } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
-// Define interface for workout
 interface WorkoutItem {
   id: number;
   day: string;
@@ -29,7 +27,6 @@ interface WorkoutItem {
 }
 
 const Index = () => {
-  // Personal info state
   const [personalInfo, setPersonalInfo] = useState({
     name: "",
     age: "",
@@ -38,7 +35,6 @@ const Index = () => {
     diet: ""
   });
 
-  // Weekly workout plan state
   const [weeklyPlan, setWeeklyPlan] = useState({
     monday: "",
     tuesday: "",
@@ -49,14 +45,12 @@ const Index = () => {
     sunday: ""
   });
 
-  // Exercise plan state
   const [selectedDay, setSelectedDay] = useState("");
   const [newExercise, setNewExercise] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [workouts, setWorkouts] = useState<WorkoutItem[]>([]);
   const [workoutCounter, setWorkoutCounter] = useState(1);
 
-  // Handle personal info changes
   const handlePersonalInfoChange = (field: string, value: string) => {
     setPersonalInfo(prev => ({
       ...prev,
@@ -64,7 +58,6 @@ const Index = () => {
     }));
   };
 
-  // Handle workout plan changes
   const handleWorkoutPlanChange = (day: string, value: string) => {
     setWeeklyPlan(prev => ({
       ...prev,
@@ -72,7 +65,6 @@ const Index = () => {
     }));
   };
 
-  // Handle adding exercises to a specific day
   const handleAddExercise = () => {
     if (!selectedDay) {
       toast({
@@ -92,7 +84,6 @@ const Index = () => {
       return;
     }
 
-    // Add the new workout
     const newWorkout: WorkoutItem = {
       id: workoutCounter,
       day: selectedDay,
@@ -109,7 +100,6 @@ const Index = () => {
     });
   };
 
-  // Handle deleting a workout
   const handleDeleteWorkout = (id: number) => {
     setWorkouts(prev => prev.filter(workout => workout.id !== id));
     
@@ -119,7 +109,6 @@ const Index = () => {
     });
   };
 
-  // Available workout types for the weekly plan
   const workoutOptions = [
     "Rest Day",
     "Upper Body",
@@ -140,7 +129,6 @@ const Index = () => {
     });
   };
 
-  // Days of the week
   const daysOfWeek = {
     monday: "Monday",
     tuesday: "Tuesday",
@@ -170,7 +158,6 @@ const Index = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Profile Info Card */}
           <Card className="md:col-span-1">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2">
@@ -232,7 +219,6 @@ const Index = () => {
             </CardContent>
           </Card>
           
-          {/* Weekly Workout Plan Card - takes 2/3 of the space */}
           <Card className="md:col-span-2">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2">
@@ -361,7 +347,6 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* Display all workouts in cards grouped by day */}
         <WorkoutDisplay workouts={workouts} onDelete={handleDeleteWorkout} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
