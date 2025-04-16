@@ -488,22 +488,28 @@ const Index = () => {
             </CardContent>
           </Card>
           
-          <WeeklyWorkingPlan 
-            plans={workingPlans}
-            onAddPlan={handleAddWorkingPlan}
-            onUpdatePlan={handleUpdateWorkingPlan}
-            onDeletePlan={handleDeleteWorkingPlan}
-          />
+          <div id="workout-plan">
+            <WeeklyWorkingPlan 
+              plans={workingPlans}
+              onAddPlan={handleAddWorkingPlan}
+              onUpdatePlan={handleUpdateWorkingPlan}
+              onDeletePlan={handleDeleteWorkingPlan}
+            />
+          </div>
           
-          <StreakCalendar 
-            streakDays={streakDays}
-            onAddStreakDay={handleAddStreakDay}
-          />
+          <div id="calendar">
+            <StreakCalendar 
+              streakDays={streakDays}
+              onAddStreakDay={handleAddStreakDay}
+            />
+          </div>
           
-          <ProgressTracking 
-            progressData={progressData}
-            onAddProgress={handleAddProgressEntry}
-          />
+          <div id="progress">
+            <ProgressTracking 
+              progressData={progressData}
+              onAddProgress={handleAddProgressEntry}
+            />
+          </div>
         </div>
 
         <WorkoutDisplay workouts={workouts} onDelete={handleDeleteWorkout} />
