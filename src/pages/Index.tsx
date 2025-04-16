@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import WorkoutDisplay from '@/components/WorkoutDisplay';
@@ -7,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { UserRound, CalendarDays, Dumbbell, ChevronRight, VideoIcon, Plus, Save, Trash2 } from 'lucide-react';
+import { UserRound, CalendarDays, Dumbbell, ChevronRight, VideoIcon, Plus, Save, Trash2, Clock, HeartPulse, Siren, Apple, Gauge } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
 import { 
@@ -19,6 +20,7 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 interface WorkoutItem {
   id: number;
@@ -32,7 +34,12 @@ const Index = () => {
     age: "",
     height: "",
     weight: "",
-    diet: ""
+    diet: "",
+    fitnessGoals: "",
+    preferredWorkoutTimes: "",
+    injuries: "",
+    nutritionPreferences: "",
+    experienceLevel: ""
   });
 
   const [weeklyPlan, setWeeklyPlan] = useState({
@@ -129,6 +136,13 @@ const Index = () => {
     });
   };
 
+  const handleSaveProfile = () => {
+    toast({
+      title: "Profile Saved",
+      description: "Your personal information has been saved successfully.",
+    });
+  };
+
   const daysOfWeek = {
     monday: "Monday",
     tuesday: "Tuesday",
@@ -138,6 +152,14 @@ const Index = () => {
     saturday: "Saturday",
     sunday: "Sunday"
   };
+
+  const experienceLevels = [
+    "Beginner",
+    "Intermediate",
+    "Advanced",
+    "Professional",
+    "Athletic",
+  ];
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -157,13 +179,17 @@ const Index = () => {
           </Link>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="md:col-span-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Personal Information Card - Now in its own column */}
+          <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2">
                 <UserRound className="h-5 w-5" />
                 Personal Info
               </CardTitle>
+              <CardDescription>
+                Your profile information helps us personalize workout recommendations
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4">
@@ -176,6 +202,7 @@ const Index = () => {
                     placeholder="Your name"
                   />
                 </div>
+                
                 <div className="grid grid-cols-3 gap-2">
                   <div>
                     <Label htmlFor="age">Age</Label>
@@ -205,21 +232,93 @@ const Index = () => {
                     />
                   </div>
                 </div>
+
                 <div className="grid gap-2">
-                  <Label htmlFor="diet">Diet Preferences (Optional)</Label>
-                  <Input 
-                    id="diet" 
-                    value={personalInfo.diet} 
-                    onChange={(e) => handlePersonalInfoChange('diet', e.target.value)} 
-                    placeholder="E.g., Vegetarian, High-protein, etc."
+                  <Label htmlFor="fitnessGoals" className="flex items-center gap-2">
+                    <HeartPulse className="h-4 w-4" /> Fitness Goals
+                  </Label>
+                  <Textarea
+                    id="fitnessGoals"
+                    value={personalInfo.fitnessGoals}
+                    onChange={(e) => handlePersonalInfoChange('fitnessGoals', e.target.value)}
+                    placeholder="E.g., lose weight, build muscle, improve endurance"
+                    className="min-h-[60px]"
                   />
                 </div>
-                <Button className="mt-2">Save Profile</Button>
+                
+                <div className="grid gap-2">
+                  <Label htmlFor="preferredWorkoutTimes" className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" /> Preferred Workout Times
+                  </Label>
+                  <Select
+                    value={personalInfo.preferredWorkoutTimes}
+                    onValueChange={(value) => handlePersonalInfoChange('preferredWorkoutTimes', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="When do you prefer to workout?" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="morning">Morning</SelectItem>
+                      <SelectItem value="afternoon">Afternoon</SelectItem>
+                      <SelectItem value="evening">Evening</SelectItem>
+                      <SelectItem value="night">Night</SelectItem>
+                      <SelectItem value="flexible">Flexible</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="grid gap-2">
+                  <Label htmlFor="injuries" className="flex items-center gap-2">
+                    <Siren className="h-4 w-4" /> Injuries or Limitations
+                  </Label>
+                  <Textarea
+                    id="injuries"
+                    value={personalInfo.injuries}
+                    onChange={(e) => handlePersonalInfoChange('injuries', e.target.value)}
+                    placeholder="Any injuries or physical limitations we should know about?"
+                    className="min-h-[60px]"
+                  />
+                </div>
+                
+                <div className="grid gap-2">
+                  <Label htmlFor="nutritionPreferences" className="flex items-center gap-2">
+                    <Apple className="h-4 w-4" /> Nutrition Preferences
+                  </Label>
+                  <Textarea
+                    id="nutritionPreferences"
+                    value={personalInfo.nutritionPreferences}
+                    onChange={(e) => handlePersonalInfoChange('nutritionPreferences', e.target.value)}
+                    placeholder="E.g., Vegetarian, High-protein, Low-carb, etc."
+                    className="min-h-[60px]"
+                  />
+                </div>
+                
+                <div className="grid gap-2">
+                  <Label htmlFor="experienceLevel" className="flex items-center gap-2">
+                    <Gauge className="h-4 w-4" /> Experience Level
+                  </Label>
+                  <Select
+                    value={personalInfo.experienceLevel}
+                    onValueChange={(value) => handlePersonalInfoChange('experienceLevel', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="What's your fitness experience level?" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {experienceLevels.map((level) => (
+                        <SelectItem key={level} value={level.toLowerCase()}>{level}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <Button className="mt-2" onClick={handleSaveProfile}>Save Profile</Button>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="md:col-span-2">
+          {/* Weekly Workout Plan Card - Now in its own column */}
+          <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2">
                 <CalendarDays className="h-5 w-5" />
