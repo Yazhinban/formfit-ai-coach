@@ -1,7 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import WorkoutDisplay from '@/components/WorkoutDisplay';
+import WeeklyWorkingPlan from '@/components/WeeklyWorkingPlan';
+import StreakCalendar from '@/components/StreakCalendar';
+import ProgressTracking from '@/components/ProgressTracking';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,11 +23,36 @@ import {
 } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { v4 as uuidv4 } from 'uuid';
 
 interface WorkoutItem {
   id: number;
   day: string;
   exercise: string;
+}
+
+interface WorkoutPlan {
+  id: string;
+  day: string;
+  exerciseType: string;
+  duration: string;
+  setsReps: string;
+  completed: boolean;
+}
+
+interface StreakDay {
+  date: Date;
+  attended: boolean;
+}
+
+interface ProgressEntry {
+  id: string;
+  date: string;
+  weight?: number;
+  strength?: number;
+  endurance?: number;
+  formQuality?: number;
+  notes?: string;
 }
 
 const Index = () => {
@@ -57,6 +84,76 @@ const Index = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [workouts, setWorkouts] = useState<WorkoutItem[]>([]);
   const [workoutCounter, setWorkoutCounter] = useState(1);
+
+  const [workingPlans, setWorkingPlans] = useState<WorkoutPlan[]>([
+    {
+      id: uuidv4(),
+      day: "monday",
+      exerciseType: "Push Day",
+      duration: "45 min",
+      setsReps: "4x12",
+      completed: false
+    },
+    {
+      id: uuidv4(),
+      day: "wednesday",
+      exerciseType: "Pull Day",
+      duration: "50 min",
+      setsReps: "4x10",
+      completed: false
+    },
+    {
+      id: uuidv4(),
+      day: "friday",
+      exerciseType: "Leg Day",
+      duration: "60 min",
+      setsReps: "3x15",
+      completed: true
+    }
+  ]);
+  
+  const [streakDays, setStreakDays] = useState<StreakDay[]>([
+    { date: new Date(Date.now() - 86400000 * 0), attended: true },
+    { date: new Date(Date.now() - 86400000 * 1), attended: true },
+    { date: new Date(Date.now() - 86400000 * 2), attended: true },
+    { date: new Date(Date.now() - 86400000 * 3), attended: false },
+    { date: new Date(Date.now() - 86400000 * 4), attended: true }
+  ]);
+  
+  const [progressData, setProgressData] = useState<ProgressEntry[]>([
+    {
+      id: uuidv4(),
+      date: new Date(Date.now() - 86400000 * 0).toISOString().split('T')[0],
+      weight: 175,
+      strength: 80,
+      endurance: 75,
+      formQuality: 85
+    },
+    {
+      id: uuidv4(),
+      date: new Date(Date.now() - 86400000 * 7).toISOString().split('T')[0],
+      weight: 178,
+      strength: 75,
+      endurance: 70,
+      formQuality: 80
+    },
+    {
+      id: uuidv4(),
+      date: new Date(Date.now() - 86400000 * 14).toISOString().split('T')[0],
+      weight: 180,
+      strength: 70,
+      endurance: 65,
+      formQuality: 75
+    },
+    {
+      id: uuidv4(),
+      date: new Date(Date.now() - 86400000 * 21).toISOString().split('T')[0],
+      weight: 182,
+      strength: 65,
+      endurance: 60,
+      formQuality: 70
+    }
+  ]);
 
   const handlePersonalInfoChange = (field: string, value: string) => {
     setPersonalInfo(prev => ({
@@ -113,6 +210,81 @@ const Index = () => {
     toast({
       title: "Workout Removed",
       description: "The workout has been removed from your plan.",
+    });
+  };
+
+  const handleAddWorkingPlan = (plan: Partial<WorkoutPlan>) => {
+    const newPlan: WorkoutPlan = {
+      id: uuidv4(),
+      day: plan.day || "monday",
+      exerciseType: plan.exerciseType || "",
+      duration: plan.duration || "",
+      setsReps: plan.setsReps || "",
+      completed: plan.completed || false
+    };
+    
+    setWorkingPlans(prev => [...prev, newPlan]);
+    
+    toast({
+      title: "Plan Added",
+      description: `Added ${newPlan.exerciseType} to your workout plan.`,
+    });
+  };
+
+  const handleUpdateWorkingPlan = (id: string, updates: Partial<WorkoutPlan>) => {
+    setWorkingPlans(prev => 
+      prev.map(plan => 
+        plan.id === id ? { ...plan, ...updates } : plan
+      )
+    );
+  };
+
+  const handleDeleteWorkingPlan = (id: string) => {
+    setWorkingPlans(prev => prev.filter(plan => plan.id !== id));
+    
+    toast({
+      title: "Plan Removed",
+      description: "The workout plan has been removed.",
+    });
+  };
+
+  const handleAddStreakDay = (date: Date, attended: boolean) => {
+    const existingIndex = streakDays.findIndex(day => 
+      day.date.getFullYear() === date.getFullYear() &&
+      day.date.getMonth() === date.getMonth() &&
+      day.date.getDate() === date.getDate()
+    );
+    
+    if (existingIndex >= 0) {
+      const updatedDays = [...streakDays];
+      updatedDays[existingIndex] = { date, attended };
+      setStreakDays(updatedDays);
+    } else {
+      setStreakDays(prev => [...prev, { date, attended }]);
+    }
+    
+    toast({
+      title: attended ? "Attendance Marked" : "Absence Recorded",
+      description: `You've marked ${new Date(date).toLocaleDateString()} as ${attended ? 'attended' : 'missed'}.`,
+    });
+  };
+
+  const handleAddProgressEntry = (entry: Partial<ProgressEntry>) => {
+    const newEntry: ProgressEntry = {
+      id: uuidv4(),
+      date: entry.date || new Date().toISOString().split('T')[0],
+      weight: entry.weight,
+      strength: entry.strength,
+      endurance: entry.endurance,
+      formQuality: entry.formQuality,
+      notes: entry.notes
+    };
+    
+    setProgressData(prev => [...prev, newEntry]);
+    
+    toast({
+      title: "Progress Recorded",
+      description: "Your progress entry has been saved.",
     });
   };
 
@@ -179,9 +351,8 @@ const Index = () => {
           </Link>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {/* Personal Information Card - Now in its own column */}
-          <Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+          <Card className="h-full">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2">
                 <UserRound className="h-5 w-5" />
@@ -317,133 +488,22 @@ const Index = () => {
             </CardContent>
           </Card>
           
-          {/* Weekly Workout Plan Card - Now in its own column */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2">
-                <CalendarDays className="h-5 w-5" />
-                Weekly Workout Plan
-              </CardTitle>
-              <CardDescription>
-                Plan your workout routine for the entire week
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[120px]">Day</TableHead>
-                    <TableHead>Workout Type</TableHead>
-                    <TableHead className="w-[150px] text-right">Exercises</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {Object.entries(daysOfWeek).map(([day, label]) => (
-                    <TableRow key={day}>
-                      <TableCell className="font-medium">{label}</TableCell>
-                      <TableCell>
-                        <Select 
-                          value={weeklyPlan[day as keyof typeof weeklyPlan]} 
-                          onValueChange={(value) => handleWorkoutPlanChange(day, value)}
-                        >
-                          <SelectTrigger id={day} className="w-full">
-                            <SelectValue placeholder="Select workout" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {workoutOptions.map((option) => (
-                              <SelectItem key={`${day}-${option}`} value={option}>
-                                {option}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Dialog open={dialogOpen && selectedDay === day} onOpenChange={(open) => {
-                          setDialogOpen(open);
-                          if (open) setSelectedDay(day);
-                        }}>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" size="sm" className="flex items-center gap-1">
-                              <Plus className="h-3.5 w-3.5" />
-                              Add Exercises
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Add Exercises for {label}</DialogTitle>
-                              <DialogDescription>
-                                Enter specific exercises you want to do on {label}.
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="grid gap-4 py-4">
-                              <div className="flex items-end gap-2">
-                                <div className="grid gap-2 flex-1">
-                                  <Label htmlFor="exercise-name">Exercise Name</Label>
-                                  <Input
-                                    id="exercise-name"
-                                    value={newExercise}
-                                    onChange={(e) => setNewExercise(e.target.value)}
-                                    placeholder="E.g., Bench Press, Squats"
-                                  />
-                                </div>
-                                <Button onClick={handleAddExercise}>Add</Button>
-                              </div>
-                              
-                              {workouts.filter(w => w.day === day).length > 0 ? (
-                                <div>
-                                  <Label>Current Exercises:</Label>
-                                  <ul className="mt-2 space-y-1">
-                                    {workouts
-                                      .filter(workout => workout.day === day)
-                                      .map((workout) => (
-                                        <li key={workout.id} className="flex items-center justify-between gap-2">
-                                          <div className="flex items-center gap-2">
-                                            <ChevronRight className="h-4 w-4 text-primary" />
-                                            <span>{workout.exercise}</span>
-                                          </div>
-                                          <Button 
-                                            variant="ghost" 
-                                            size="icon" 
-                                            className="h-7 w-7"
-                                            onClick={() => handleDeleteWorkout(workout.id)}
-                                          >
-                                            <Trash2 className="h-4 w-4" />
-                                          </Button>
-                                        </li>
-                                      ))
-                                    }
-                                  </ul>
-                                </div>
-                              ) : (
-                                <p className="text-sm text-muted-foreground">
-                                  No exercises added for {label} yet.
-                                </p>
-                              )}
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                        
-                        {workouts.filter(w => w.day === day).length > 0 && (
-                          <div className="text-sm text-muted-foreground mt-1">
-                            {workouts.filter(w => w.day === day).length} exercise(s)
-                          </div>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              
-              <Separator className="my-4" />
-              <div className="flex justify-end">
-                <Button onClick={handleSavePlan}>
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Plan
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <WeeklyWorkingPlan 
+            plans={workingPlans}
+            onAddPlan={handleAddWorkingPlan}
+            onUpdatePlan={handleUpdateWorkingPlan}
+            onDeletePlan={handleDeleteWorkingPlan}
+          />
+          
+          <StreakCalendar 
+            streakDays={streakDays}
+            onAddStreakDay={handleAddStreakDay}
+          />
+          
+          <ProgressTracking 
+            progressData={progressData}
+            onAddProgress={handleAddProgressEntry}
+          />
         </div>
 
         <WorkoutDisplay workouts={workouts} onDelete={handleDeleteWorkout} />
