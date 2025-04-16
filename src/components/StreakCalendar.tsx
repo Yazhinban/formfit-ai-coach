@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarCheck, CalendarDays, CalendarX, Trophy, Clock } from 'lucide-react';
-import { format, isSameDay } from 'date-fns';
+import { CalendarCheck, CalendarDays, CalendarX, Trophy, Clock, Flame } from 'lucide-react';
+import { format, isSameDay, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
@@ -54,6 +54,32 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
     return streak;
   }, [streakDays]);
 
+  const longestStreak = React.useMemo(() => {
+    if (!streakDays.length) return 0;
+    
+    // Sort by date ascending
+    const sortedDays = [...streakDays]
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    let currentStreak = 0;
+    let maxStreak = 0;
+    
+    for (const day of sortedDays) {
+      if (day.attended) {
+        currentStreak++;
+        maxStreak = Math.max(maxStreak, currentStreak);
+      } else {
+        currentStreak = 0;
+      }
+    }
+    
+    return maxStreak;
+  }, [streakDays]);
+
+  const totalWorkouts = React.useMemo(() => {
+    return streakDays.filter(day => day.attended).length;
+  }, [streakDays]);
+
   return (
     <Card className="h-full">
       <CardHeader>
@@ -69,7 +95,7 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="bg-primary/10 p-3 rounded-full">
-              <Trophy className="h-5 w-5 text-primary" />
+              <Flame className="h-5 w-5 text-primary" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Current Streak</p>
@@ -77,16 +103,37 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
             </div>
           </div>
           
-          <div className="flex items-center gap-1">
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded-full bg-green-500"></div>
-              <span className="text-xs">Attended</span>
+          <div className="flex flex-col items-end gap-1 text-sm">
+            <div className="flex items-center gap-2">
+              <span>Best Streak:</span>
+              <Badge variant="outline" className="font-semibold">
+                {longestStreak} days
+              </Badge>
             </div>
-            <div className="flex items-center gap-1 ml-2">
-              <div className="w-3 h-3 rounded-full bg-red-500"></div>
-              <span className="text-xs">Missed</span>
+            <div className="flex items-center gap-2">
+              <span>Total Workouts:</span>
+              <Badge variant="outline" className="font-semibold">
+                {totalWorkouts}
+              </Badge>
             </div>
           </div>
+        </div>
+        
+        <div className="flex items-center gap-1 justify-center mt-2">
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+            <span className="text-xs">Attended</span>
+          </div>
+          <div className="flex items-center gap-1 ml-2">
+            <div className="w-3 h-3 rounded-full bg-red-500"></div>
+            <span className="text-xs">Missed</span>
+          </div>
+          {isToday(selectedDate || new Date()) && (
+            <div className="flex items-center gap-1 ml-2">
+              <div className="w-3 h-3 rounded-full border border-primary"></div>
+              <span className="text-xs">Today</span>
+            </div>
+          )}
         </div>
         
         <Popover>
@@ -112,6 +159,7 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
                 missed: streakDays
                   .filter(day => !day.attended)
                   .map(day => new Date(day.date)),
+                today: [new Date()]
               }}
               modifiersStyles={{
                 attended: { 
@@ -124,6 +172,10 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
                   color: 'rgb(220, 38, 38)',
                   fontWeight: 'bold'
                 },
+                today: {
+                  border: '2px solid var(--primary)',
+                  color: 'var(--primary)'
+                }
               }}
             />
           </PopoverContent>
