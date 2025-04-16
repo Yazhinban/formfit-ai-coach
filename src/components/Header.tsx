@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Dumbbell, ArrowLeft, Calendar, TrendingUp, ClipboardList } from 'lucide-react';
+import React from 'react';
+import { Dumbbell, ArrowLeft, Calendar, TrendingUp, ClipboardList, User, VideoIcon, Apple } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import {
@@ -16,7 +16,6 @@ import { cn } from "@/lib/utils";
 
 const Header = () => {
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState('dashboard');
   
   return (
     <header className="w-full bg-background py-4 px-6 border-b border-border/40 sticky top-0 z-10">
@@ -50,7 +49,7 @@ const Header = () => {
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <NavigationMenuTrigger onClick={() => setActiveTab('dashboard')}>
+                <NavigationMenuTrigger>
                   Dashboard Tools
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
@@ -72,25 +71,46 @@ const Header = () => {
                       </NavigationMenuLink>
                     </li>
                     <ListItem
-                      href="#calendar"
+                      href="/personal-info"
+                      title="Personal Information"
+                      icon={<User className="h-4 w-4 mr-2" />}
+                    >
+                      Manage your profile details and fitness goals
+                    </ListItem>
+                    <ListItem
+                      href="/workout-plan"
+                      title="Weekly Workout Plan"
+                      icon={<ClipboardList className="h-4 w-4 mr-2" />}
+                    >
+                      Schedule and manage your weekly workouts
+                    </ListItem>
+                    <ListItem
+                      href="/calendar"
                       title="Calendar"
                       icon={<Calendar className="h-4 w-4 mr-2" />}
                     >
                       Track your workout attendance and maintain your streak
                     </ListItem>
                     <ListItem
-                      href="#progress"
+                      href="/progress"
                       title="Progress"
                       icon={<TrendingUp className="h-4 w-4 mr-2" />}
                     >
                       Monitor your fitness improvements over time
                     </ListItem>
                     <ListItem
-                      href="#workout-plan"
-                      title="Weekly Workout Plan"
-                      icon={<ClipboardList className="h-4 w-4 mr-2" />}
+                      href="/nutrition-tips"
+                      title="Nutrition & Tips"
+                      icon={<Apple className="h-4 w-4 mr-2" />}
                     >
-                      Schedule and manage your weekly workouts
+                      Expert workout and nutrition guidance
+                    </ListItem>
+                    <ListItem
+                      href="/form-analyzer"
+                      title="Form Analyzer"
+                      icon={<VideoIcon className="h-4 w-4 mr-2" />}
+                    >
+                      Upload videos and get AI feedback on your form
                     </ListItem>
                   </ul>
                 </NavigationMenuContent>

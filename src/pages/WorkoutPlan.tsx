@@ -1,0 +1,111 @@
+
+import React from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import Header from '@/components/Header';
+import WeeklyWorkingPlan from '@/components/WeeklyWorkingPlan';
+import { Button } from '@/components/ui/button';
+import { VideoIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+interface WorkoutPlan {
+  id: string;
+  day: string;
+  exerciseType: string;
+  duration: string;
+  setsReps: string;
+  completed: boolean;
+}
+
+const WorkoutPlanPage = () => {
+  const [workingPlans, setWorkingPlans] = React.useState<WorkoutPlan[]>([
+    {
+      id: uuidv4(),
+      day: "monday",
+      exerciseType: "Push Day",
+      duration: "45 min",
+      setsReps: "4x12",
+      completed: false
+    },
+    {
+      id: uuidv4(),
+      day: "wednesday",
+      exerciseType: "Pull Day",
+      duration: "50 min",
+      setsReps: "4x10",
+      completed: false
+    },
+    {
+      id: uuidv4(),
+      day: "friday",
+      exerciseType: "Leg Day",
+      duration: "60 min",
+      setsReps: "3x15",
+      completed: true
+    }
+  ]);
+
+  const handleAddWorkingPlan = (plan: Partial<WorkoutPlan>) => {
+    const newPlan: WorkoutPlan = {
+      id: uuidv4(),
+      day: plan.day || "monday",
+      exerciseType: plan.exerciseType || "",
+      duration: plan.duration || "",
+      setsReps: plan.setsReps || "",
+      completed: plan.completed || false
+    };
+    
+    setWorkingPlans(prev => [...prev, newPlan]);
+  };
+
+  const handleUpdateWorkingPlan = (id: string, updates: Partial<WorkoutPlan>) => {
+    setWorkingPlans(prev => 
+      prev.map(plan => 
+        plan.id === id ? { ...plan, ...updates } : plan
+      )
+    );
+  };
+
+  const handleDeleteWorkingPlan = (id: string) => {
+    setWorkingPlans(prev => prev.filter(plan => plan.id !== id));
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <Header />
+      
+      <main className="flex-1 container max-w-7xl py-8 px-4 sm:px-6">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Weekly Workout Plan</h1>
+            <p className="text-muted-foreground">Schedule and manage your weekly workouts</p>
+          </div>
+          <Link to="/form-analyzer">
+            <Button className="flex items-center gap-2" size="lg">
+              <VideoIcon className="h-5 w-5" /> 
+              Go to Form Analyzer
+            </Button>
+          </Link>
+        </div>
+        
+        <div className="max-w-4xl mx-auto">
+          <WeeklyWorkingPlan 
+            plans={workingPlans}
+            onAddPlan={handleAddWorkingPlan}
+            onUpdatePlan={handleUpdateWorkingPlan}
+            onDeletePlan={handleDeleteWorkingPlan}
+          />
+        </div>
+      </main>
+      
+      <footer className="py-6 border-t">
+        <div className="container max-w-7xl px-4 sm:px-6">
+          <p className="text-center text-muted-foreground text-sm">
+            FormFit AI Coach © {new Date().getFullYear()} | AI Powered Workout Analysis
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default WorkoutPlanPage;
