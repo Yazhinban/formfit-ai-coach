@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import Header from '@/components/Header';
@@ -6,14 +5,7 @@ import ProgressTracking from '@/components/ProgressTracking';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { VideoIcon } from 'lucide-react';
-
-interface ProgressEntry {
-  id: string;
-  date: string;
-  weight?: number;
-  workout?: string;
-  notes?: string;
-}
+import { ProgressEntry } from '@/components/progress/types';
 
 const ProgressPage = () => {
   const [progressData, setProgressData] = React.useState<ProgressEntry[]>([
