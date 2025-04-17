@@ -6,7 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 // Import refactored components
 import UploadTab from '@/components/upload/UploadTab';
@@ -153,68 +154,112 @@ const FormAnalyzer = () => {
     });
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { 
+        duration: 0.5,
+        when: "beforeChildren",
+        staggerChildren: 0.2
+      } 
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+  };
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <motion.div 
+      className="min-h-screen bg-background flex flex-col"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       <Header />
       
-      <main className="flex-1 container max-w-7xl py-8 px-4 sm:px-6">
-        <div className="flex items-center gap-3 mb-4">
+      <motion.main className="flex-1 container max-w-7xl py-8 px-4 sm:px-6" variants={itemVariants}>
+        <motion.div className="flex items-center gap-3 mb-4" variants={itemVariants}>
           <Link to="/">
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Home
+            <Button variant="outline" size="sm" className="flex items-center gap-2 group">
+              <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+              <span>Back to Home</span>
             </Button>
           </Link>
-        </div>
+        </motion.div>
         
-        <h1 className="text-3xl font-bold mb-2">Form Analyzer</h1>
-        <p className="text-muted-foreground mb-8">Upload or record your workout to get real-time form correction</p>
+        <motion.div variants={itemVariants}>
+          <motion.h1 
+            className="text-3xl font-bold mb-2"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            Form Analyzer
+          </motion.h1>
+          <motion.div 
+            className="flex items-center gap-2 mb-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <p className="text-muted-foreground">Upload or record your workout to get real-time form correction</p>
+            <span className="inline-flex items-center">
+              <Sparkles className="h-4 w-4 text-yellow-500 animate-pulse" />
+            </span>
+          </motion.div>
+        </motion.div>
         
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="upload">Upload Video</TabsTrigger>
-            <TabsTrigger value="analyze">Analyze Form</TabsTrigger>
-            <TabsTrigger value="results">Results</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="upload" className="mt-6">
-            <UploadTab 
-              onVideoLoaded={handleVideoLoaded}
-              videoElement={videoElement}
-              onNavigateToAnalyze={() => setActiveTab("analyze")}
-              onWorkoutTypeChange={handleWorkoutTypeChange}
-            />
-          </TabsContent>
-          
-          <TabsContent value="analyze" className="mt-6">
-            <AnalysisTab 
-              videoElement={videoElement}
-              keypoints={keypoints}
-              isAnalyzing={isAnalyzing}
-              analysisComplete={analysisComplete}
-              analysisResult={analysisResult || {}}
-              onStartAnalysis={handleStartAnalysis}
-              onStopAnalysis={handleStopAnalysis}
-              onResetAnalysis={handleResetAnalysis}
-              onSendMessage={handleSendMessage}
-              onNavigateToResults={() => setActiveTab("results")}
-              onNavigateToUpload={() => setActiveTab("upload")}
-              workoutType={workoutType}
-              analysisProgress={analysisProgress}
-            />
-          </TabsContent>
-          
-          <TabsContent value="results" className="mt-6">
-            <ResultsTab 
-              analysisComplete={analysisComplete}
-              analysisResult={analysisResult || {}}
-              onSendMessage={handleSendMessage}
-              onNavigateToAnalyze={() => setActiveTab("analyze")}
-              workoutType={workoutType}
-            />
-          </TabsContent>
-        </Tabs>
-      </main>
+        <motion.div variants={itemVariants}>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-3 bg-gradient-to-r from-muted/80 via-muted to-muted/80 shadow-inner">
+              <TabsTrigger value="upload" className="data-[state=active]:bg-background data-[state=active]:shadow-md transition-all duration-300">Upload Video</TabsTrigger>
+              <TabsTrigger value="analyze" className="data-[state=active]:bg-background data-[state=active]:shadow-md transition-all duration-300">Analyze Form</TabsTrigger>
+              <TabsTrigger value="results" className="data-[state=active]:bg-background data-[state=active]:shadow-md transition-all duration-300">Results</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="upload" className="mt-6">
+              <UploadTab 
+                onVideoLoaded={handleVideoLoaded}
+                videoElement={videoElement}
+                onNavigateToAnalyze={() => setActiveTab("analyze")}
+                onWorkoutTypeChange={handleWorkoutTypeChange}
+              />
+            </TabsContent>
+            
+            <TabsContent value="analyze" className="mt-6">
+              <AnalysisTab 
+                videoElement={videoElement}
+                keypoints={keypoints}
+                isAnalyzing={isAnalyzing}
+                analysisComplete={analysisComplete}
+                analysisResult={analysisResult || {}}
+                onStartAnalysis={handleStartAnalysis}
+                onStopAnalysis={handleStopAnalysis}
+                onResetAnalysis={handleResetAnalysis}
+                onSendMessage={handleSendMessage}
+                onNavigateToResults={() => setActiveTab("results")}
+                onNavigateToUpload={() => setActiveTab("upload")}
+                workoutType={workoutType}
+                analysisProgress={analysisProgress}
+              />
+            </TabsContent>
+            
+            <TabsContent value="results" className="mt-6">
+              <ResultsTab 
+                analysisComplete={analysisComplete}
+                analysisResult={analysisResult || {}}
+                onSendMessage={handleSendMessage}
+                onNavigateToAnalyze={() => setActiveTab("analyze")}
+                workoutType={workoutType}
+              />
+            </TabsContent>
+          </Tabs>
+        </motion.div>
+      </motion.main>
       
       <footer className="py-6 border-t">
         <div className="container max-w-7xl px-4 sm:px-6">
@@ -223,7 +268,7 @@ const FormAnalyzer = () => {
           </p>
         </div>
       </footer>
-    </div>
+    </motion.div>
   );
 };
 
