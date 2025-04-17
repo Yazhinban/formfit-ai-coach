@@ -11,9 +11,7 @@ interface ProgressEntry {
   id: string;
   date: string;
   weight?: number;
-  strength?: number;
-  endurance?: number;
-  formQuality?: number;
+  workout?: string;
   notes?: string;
 }
 
@@ -23,33 +21,25 @@ const ProgressPage = () => {
       id: uuidv4(),
       date: new Date(Date.now() - 86400000 * 0).toISOString().split('T')[0],
       weight: 175,
-      strength: 80,
-      endurance: 75,
-      formQuality: 85
+      workout: "Push Day"
     },
     {
       id: uuidv4(),
       date: new Date(Date.now() - 86400000 * 7).toISOString().split('T')[0],
       weight: 178,
-      strength: 75,
-      endurance: 70,
-      formQuality: 80
+      workout: "Pull Day"
     },
     {
       id: uuidv4(),
       date: new Date(Date.now() - 86400000 * 14).toISOString().split('T')[0],
       weight: 180,
-      strength: 70,
-      endurance: 65,
-      formQuality: 75
+      workout: "Leg Day"
     },
     {
       id: uuidv4(),
       date: new Date(Date.now() - 86400000 * 21).toISOString().split('T')[0],
       weight: 182,
-      strength: 65,
-      endurance: 60,
-      formQuality: 70
+      workout: "Rest Day"
     }
   ]);
 
@@ -58,9 +48,7 @@ const ProgressPage = () => {
       id: uuidv4(),
       date: entry.date || new Date().toISOString().split('T')[0],
       weight: entry.weight,
-      strength: entry.strength,
-      endurance: entry.endurance,
-      formQuality: entry.formQuality,
+      workout: entry.workout,
       notes: entry.notes
     };
     
@@ -78,7 +66,7 @@ const ProgressPage = () => {
             <p className="text-muted-foreground">Monitor your fitness improvements over time</p>
           </div>
           <Link to="/form-analyzer">
-            <Button className="flex items-center gap-2" size="lg">
+            <Button className="flex items-center gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary transition-all duration-300" size="lg">
               <VideoIcon className="h-5 w-5" /> 
               Go to Form Analyzer
             </Button>
