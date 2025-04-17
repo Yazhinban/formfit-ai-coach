@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarCheck, CalendarDays, CalendarX, Trophy, Clock, Flame } from 'lucide-react';
+import { CalendarCheck, CalendarDays, CalendarX, Trophy, Clock, Flame, Coffee } from 'lucide-react';
 import { format, isSameDay, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -12,11 +12,12 @@ import { Badge } from '@/components/ui/badge';
 interface StreakDay {
   date: Date;
   attended: boolean;
+  isRestDay?: boolean;
 }
 
 interface StreakCalendarProps {
   streakDays: StreakDay[];
-  onAddStreakDay: (date: Date, attended: boolean) => void;
+  onAddStreakDay: (date: Date, attended: boolean, isRestDay?: boolean) => void;
 }
 
 const StreakCalendar: React.FC<StreakCalendarProps> = ({ 
@@ -25,14 +26,14 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   
-  const getAttendanceForDate = (date: Date): boolean | undefined => {
+  const getAttendanceForDate = (date: Date): { attended?: boolean, isRestDay?: boolean } => {
     const found = streakDays.find(day => isSameDay(new Date(day.date), date));
-    return found?.attended;
+    return { attended: found?.attended, isRestDay: found?.isRestDay };
   };
 
-  const handleAddAttendance = (attended: boolean) => {
+  const handleAddAttendance = (attended: boolean, isRestDay?: boolean) => {
     if (selectedDate) {
-      onAddStreakDay(selectedDate, attended);
+      onAddStreakDay(selectedDate, attended, isRestDay);
     }
   };
 
@@ -45,7 +46,7 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
     
     let streak = 0;
     for (const day of sortedDays) {
-      if (day.attended) {
+      if (day.attended || day.isRestDay) {
         streak++;
       } else {
         break;
@@ -65,7 +66,7 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
     let maxStreak = 0;
     
     for (const day of sortedDays) {
-      if (day.attended) {
+      if (day.attended || day.isRestDay) {
         currentStreak++;
         maxStreak = Math.max(maxStreak, currentStreak);
       } else {
@@ -78,6 +79,10 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
 
   const totalWorkouts = React.useMemo(() => {
     return streakDays.filter(day => day.attended).length;
+  }, [streakDays]);
+
+  const restDays = React.useMemo(() => {
+    return streakDays.filter(day => day.isRestDay).length;
   }, [streakDays]);
 
   return (
@@ -116,6 +121,12 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
                 {totalWorkouts}
               </Badge>
             </div>
+            <div className="flex items-center gap-2">
+              <span>Rest Days:</span>
+              <Badge variant="outline" className="font-semibold">
+                {restDays}
+              </Badge>
+            </div>
           </div>
         </div>
         
@@ -123,6 +134,10 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 rounded-full bg-green-500"></div>
             <span className="text-xs">Attended</span>
+          </div>
+          <div className="flex items-center gap-1 ml-2">
+            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+            <span className="text-xs">Rest Day</span>
           </div>
           <div className="flex items-center gap-1 ml-2">
             <div className="w-3 h-3 rounded-full bg-red-500"></div>
@@ -156,8 +171,11 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
                 attended: streakDays
                   .filter(day => day.attended)
                   .map(day => new Date(day.date)),
+                restDay: streakDays
+                  .filter(day => day.isRestDay)
+                  .map(day => new Date(day.date)),
                 missed: streakDays
-                  .filter(day => !day.attended)
+                  .filter(day => !day.attended && !day.isRestDay)
                   .map(day => new Date(day.date)),
                 today: [new Date()]
               }}
@@ -165,6 +183,11 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
                 attended: { 
                   backgroundColor: 'rgba(34, 197, 94, 0.2)', 
                   color: 'rgb(22, 163, 74)',
+                  fontWeight: 'bold'
+                },
+                restDay: { 
+                  backgroundColor: 'rgba(234, 179, 8, 0.2)',
+                  color: 'rgb(202, 138, 4)',
                   fontWeight: 'bold'
                 },
                 missed: { 
@@ -187,14 +210,21 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
           <div className="flex gap-2">
             <Button 
               className="flex-1 bg-green-600 hover:bg-green-700"
-              onClick={() => handleAddAttendance(true)}
+              onClick={() => handleAddAttendance(true, false)}
             >
               <CalendarCheck className="h-4 w-4 mr-2" />
               Attended
             </Button>
             <Button 
+              className="flex-1 bg-yellow-500 hover:bg-yellow-600"
+              onClick={() => handleAddAttendance(false, true)}
+            >
+              <Coffee className="h-4 w-4 mr-2" />
+              Rest Day
+            </Button>
+            <Button 
               className="flex-1 bg-red-600 hover:bg-red-700"
-              onClick={() => handleAddAttendance(false)}
+              onClick={() => handleAddAttendance(false, false)}
             >
               <CalendarX className="h-4 w-4 mr-2" />
               Missed
@@ -211,11 +241,13 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
               .map((day, index) => (
                 <div key={index} className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${day.attended ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                    <div className={`w-2 h-2 rounded-full ${
+                      day.attended ? 'bg-green-500' : day.isRestDay ? 'bg-yellow-500' : 'bg-red-500'
+                    }`}></div>
                     <span>{format(new Date(day.date), 'MMM d, yyyy')}</span>
                   </div>
-                  <Badge variant={day.attended ? "default" : "destructive"}>
-                    {day.attended ? 'Attended' : 'Missed'}
+                  <Badge variant={day.attended ? "default" : day.isRestDay ? "outline" : "destructive"}>
+                    {day.attended ? 'Attended' : day.isRestDay ? 'Rest Day' : 'Missed'}
                   </Badge>
                 </div>
               ))}

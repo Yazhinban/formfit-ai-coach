@@ -9,18 +9,19 @@ import { VideoIcon } from 'lucide-react';
 interface StreakDay {
   date: Date;
   attended: boolean;
+  isRestDay?: boolean;
 }
 
 const CalendarPage = () => {
   const [streakDays, setStreakDays] = React.useState<StreakDay[]>([
-    { date: new Date(Date.now() - 86400000 * 0), attended: true },
-    { date: new Date(Date.now() - 86400000 * 1), attended: true },
-    { date: new Date(Date.now() - 86400000 * 2), attended: true },
-    { date: new Date(Date.now() - 86400000 * 3), attended: false },
-    { date: new Date(Date.now() - 86400000 * 4), attended: true }
+    { date: new Date(Date.now() - 86400000 * 0), attended: true, isRestDay: false },
+    { date: new Date(Date.now() - 86400000 * 1), attended: true, isRestDay: false },
+    { date: new Date(Date.now() - 86400000 * 2), attended: false, isRestDay: true },
+    { date: new Date(Date.now() - 86400000 * 3), attended: false, isRestDay: false },
+    { date: new Date(Date.now() - 86400000 * 4), attended: true, isRestDay: false }
   ]);
 
-  const handleAddStreakDay = (date: Date, attended: boolean) => {
+  const handleAddStreakDay = (date: Date, attended: boolean, isRestDay: boolean = false) => {
     const existingIndex = streakDays.findIndex(day => 
       day.date.getFullYear() === date.getFullYear() &&
       day.date.getMonth() === date.getMonth() &&
@@ -29,10 +30,10 @@ const CalendarPage = () => {
     
     if (existingIndex >= 0) {
       const updatedDays = [...streakDays];
-      updatedDays[existingIndex] = { date, attended };
+      updatedDays[existingIndex] = { date, attended, isRestDay };
       setStreakDays(updatedDays);
     } else {
-      setStreakDays(prev => [...prev, { date, attended }]);
+      setStreakDays(prev => [...prev, { date, attended, isRestDay }]);
     }
   };
 
