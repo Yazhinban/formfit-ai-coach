@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Check, Share2, Activity, ChevronRight, Copy, Facebook, Twitter, Linkedin } from 'lucide-react';
+import { Share2, Copy, Facebook, Twitter, Linkedin } from 'lucide-react';
 import ResultsView from '@/components/ResultsView';
 import ChatInterface from '@/components/ChatInterface';
 import { ChartContainer } from '@/components/ui/chart';
@@ -331,7 +330,6 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
             onClick={() => setShowGraph(!showGraph)}
             className="flex items-center gap-2"
           >
-            <Activity size={16} />
             {showGraph ? 'Hide Movement Graph' : 'View Movement Graph'}
           </Button>
           

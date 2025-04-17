@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ChevronRight, VideoIcon, Apple, UtensilsCrossed, Coffee, Salad, Scale, Leaf, Wind, Timer, BarChart, Flame, Heart, Award, Trophy } from 'lucide-react';
+import { ChevronRight, VideoIcon, Apple, UtensilsCrossed, Coffee, Salad, Scale, Leaf, Wind, Timer, BarChart, Flame, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { motion } from 'framer-motion';
 
 const NutritionTips = () => {
   const [dietType, setDietType] = useState<'bulking' | 'cutting'>('bulking');
@@ -115,134 +116,182 @@ const NutritionTips = () => {
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <Card className="lg:col-span-1 shadow-lg transition-all duration-300 hover:shadow-xl animate-fade-in">
-            <CardHeader className="bg-gradient-to-r from-primary/10 to-background rounded-t-lg">
-              <CardTitle className="flex items-center gap-2">
-                <Flame className="h-5 w-5" />
-                Workout Recommendations
-              </CardTitle>
-              <CardDescription>Science-backed exercise guidance for optimal results</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-4">
-                {workoutRecommendations.map((tip, i) => (
-                  <li key={i} className="flex items-start gap-3 border-b border-border/30 pb-3 last:border-0 group hover:bg-muted/30 p-2 rounded-md transition-colors">
-                    <div className="bg-primary/10 p-2 rounded-full mt-0.5 group-hover:bg-primary/20 transition-colors">
-                      {tip.icon}
-                    </div>
-                    <div>
-                      <h3 className="font-medium">{tip.title}</h3>
-                      <p className="text-muted-foreground text-sm">{tip.description}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-          
-          <Card className="lg:col-span-1 shadow-lg transition-all duration-300 hover:shadow-xl animate-fade-in">
-            <CardHeader className="bg-gradient-to-r from-primary/10 to-background rounded-t-lg">
-              <CardTitle className="flex items-center gap-2">
-                <Apple className="h-5 w-5" />
-                Nutrition Tips
-              </CardTitle>
-              <CardDescription>Dietary guidance to fuel your performance</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-4">
-                {nutritionTips.map((tip, i) => (
-                  <li key={i} className="flex items-start gap-3 border-b border-border/30 pb-3 last:border-0 group hover:bg-muted/30 p-2 rounded-md transition-colors">
-                    <div className="bg-primary/10 p-2 rounded-full mt-0.5 group-hover:bg-primary/20 transition-colors">
-                      {tip.icon}
-                    </div>
-                    <div>
-                      <h3 className="font-medium">{tip.title}</h3>
-                      <p className="text-muted-foreground text-sm">{tip.description}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-          
-          <Card className="lg:col-span-1 shadow-lg transition-all duration-300 hover:shadow-xl animate-fade-in">
-            <CardHeader className="bg-gradient-to-r from-primary/10 to-background rounded-t-lg">
-              <CardTitle className="flex items-center gap-2">
-                <UtensilsCrossed className="h-5 w-5" />
-                Diet Plans
-              </CardTitle>
-              <CardDescription>Sample meal plans for your fitness goals</CardDescription>
-              <Tabs 
-                value={dietType} 
-                onValueChange={(v) => setDietType(v as 'bulking' | 'cutting')} 
-                className="mt-2"
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="bulking" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-                    Bulking
-                  </TabsTrigger>
-                  <TabsTrigger value="cutting" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
-                    Cutting
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="border-b border-border/30 text-xs font-medium text-muted-foreground">
-                      <th className="py-2 px-1 text-left">Meal</th>
-                      <th className="py-2 px-1 text-left">Foods</th>
-                      <th className="py-2 px-1 text-right">Calories</th>
-                      <th className="py-2 px-1 text-right">Protein</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(dietType === 'bulking' ? bulkingPlan : cuttingPlan).map((meal, i) => (
-                      <tr 
-                        key={i} 
-                        className={`border-b border-border/10 hover:bg-muted/30 transition-colors ${
-                          i % 2 === 0 ? 'bg-muted/5' : ''
-                        }`}
-                      >
-                        <td className="py-2 px-1 text-sm font-medium">{meal.meal}</td>
-                        <td className="py-2 px-1 text-sm">{meal.foods}</td>
-                        <td className="py-2 px-1 text-sm text-right">{meal.calories}</td>
-                        <td className="py-2 px-1 text-sm text-right">{meal.protein}</td>
+          {/* Diet Plans - Moved to first position */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="lg:col-span-1 shadow-lg transition-all duration-300 hover:shadow-xl"
+          >
+            <Card>
+              <CardHeader className="bg-gradient-to-r from-primary/10 to-background rounded-t-lg">
+                <CardTitle className="flex items-center gap-2">
+                  <UtensilsCrossed className="h-5 w-5" />
+                  Diet Plans
+                </CardTitle>
+                <CardDescription>Sample meal plans for your fitness goals</CardDescription>
+                <Tabs 
+                  value={dietType} 
+                  onValueChange={(v) => setDietType(v as 'bulking' | 'cutting')} 
+                  className="mt-2"
+                >
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger 
+                      value="bulking" 
+                      className="data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all"
+                    >
+                      Bulking
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="cutting" 
+                      className="data-[state=active]:bg-red-600 data-[state=active]:text-white transition-all"
+                    >
+                      Cutting
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </CardHeader>
+              <CardContent>
+                <motion.div 
+                  className="overflow-x-auto"
+                  key={dietType}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b border-border/30 text-xs font-medium text-muted-foreground">
+                        <th className="py-2 px-1 text-left">Meal</th>
+                        <th className="py-2 px-1 text-left">Foods</th>
+                        <th className="py-2 px-1 text-right">Calories</th>
+                        <th className="py-2 px-1 text-right">Protein</th>
                       </tr>
-                    ))}
-                    <tr className="font-medium">
-                      <td colSpan={2} className="py-2 px-1 text-right text-sm">Daily Total:</td>
-                      <td className="py-2 px-1 text-right text-sm">
-                        {dietType === 'bulking' ? '~2,950' : '~1,440'} cal
-                      </td>
-                      <td className="py-2 px-1 text-right text-sm">
-                        {dietType === 'bulking' ? '~215g' : '~161g'}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              
-              <div className="mt-4 pt-2 border-t border-border/30">
-                <p className="text-xs text-muted-foreground mb-2">
-                  {dietType === 'bulking' 
-                    ? 'This bulking plan aims for a 500 calorie surplus to promote muscle growth.' 
-                    : 'This cutting plan creates a 500 calorie deficit while maintaining protein intake.'}
-                </p>
+                    </thead>
+                    <tbody>
+                      {(dietType === 'bulking' ? bulkingPlan : cuttingPlan).map((meal, i) => (
+                        <tr 
+                          key={i} 
+                          className={`border-b border-border/10 hover:bg-muted/30 transition-colors ${
+                            i % 2 === 0 ? 'bg-muted/5' : ''
+                          }`}
+                        >
+                          <td className="py-2 px-1 text-sm font-medium">{meal.meal}</td>
+                          <td className="py-2 px-1 text-sm">{meal.foods}</td>
+                          <td className="py-2 px-1 text-sm text-right">{meal.calories}</td>
+                          <td className="py-2 px-1 text-sm text-right">{meal.protein}</td>
+                        </tr>
+                      ))}
+                      <tr className="font-medium">
+                        <td colSpan={2} className="py-2 px-1 text-right text-sm">Daily Total:</td>
+                        <td className="py-2 px-1 text-right text-sm">
+                          {dietType === 'bulking' ? '~2,950' : '~1,440'} cal
+                        </td>
+                        <td className="py-2 px-1 text-right text-sm">
+                          {dietType === 'bulking' ? '~215g' : '~161g'}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </motion.div>
                 
-                <div className="mt-4">
-                  <Link to="/form-analyzer">
-                    <Button variant="outline" className="w-full group">
-                      <span>Analyze Your Form</span>
-                      <ChevronRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </Link>
+                <div className="mt-4 pt-2 border-t border-border/30">
+                  <p className="text-xs text-muted-foreground mb-2">
+                    {dietType === 'bulking' 
+                      ? 'This bulking plan aims for a 500 calorie surplus to promote muscle growth.' 
+                      : 'This cutting plan creates a 500 calorie deficit while maintaining protein intake.'}
+                  </p>
+                  
+                  <div className="mt-4">
+                    <Link to="/form-analyzer">
+                      <Button variant="outline" className="w-full group">
+                        <span>Analyze Your Form</span>
+                        <ChevronRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </motion.div>
+          
+          {/* Nutrition Tips - Moved to second position */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="lg:col-span-1 shadow-lg transition-all duration-300 hover:shadow-xl"
+          >
+            <Card>
+              <CardHeader className="bg-gradient-to-r from-primary/10 to-background rounded-t-lg">
+                <CardTitle className="flex items-center gap-2">
+                  <Apple className="h-5 w-5" />
+                  Nutrition Tips
+                </CardTitle>
+                <CardDescription>Dietary guidance to fuel your performance</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-4">
+                  {nutritionTips.map((tip, i) => (
+                    <motion.li 
+                      key={i}
+                      initial={{ opacity: 0, x: -5 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3, delay: i * 0.05 }}
+                      className="flex items-start gap-3 border-b border-border/30 pb-3 last:border-0 group hover:bg-muted/30 p-2 rounded-md transition-colors"
+                    >
+                      <div className="bg-primary/10 p-2 rounded-full mt-0.5 group-hover:bg-primary/20 transition-colors">
+                        {tip.icon}
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{tip.title}</h3>
+                        <p className="text-muted-foreground text-sm">{tip.description}</p>
+                      </div>
+                    </motion.li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </motion.div>
+          
+          {/* Workout Recommendations - Moved to third position */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="lg:col-span-1 shadow-lg transition-all duration-300 hover:shadow-xl"
+          >
+            <Card>
+              <CardHeader className="bg-gradient-to-r from-primary/10 to-background rounded-t-lg">
+                <CardTitle className="flex items-center gap-2">
+                  <Flame className="h-5 w-5" />
+                  Workout Recommendations
+                </CardTitle>
+                <CardDescription>Science-backed exercise guidance for optimal results</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-4">
+                  {workoutRecommendations.map((tip, i) => (
+                    <motion.li 
+                      key={i}
+                      initial={{ opacity: 0, x: -5 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3, delay: i * 0.05 }}
+                      className="flex items-start gap-3 border-b border-border/30 pb-3 last:border-0 group hover:bg-muted/30 p-2 rounded-md transition-colors"
+                    >
+                      <div className="bg-primary/10 p-2 rounded-full mt-0.5 group-hover:bg-primary/20 transition-colors">
+                        {tip.icon}
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{tip.title}</h3>
+                        <p className="text-muted-foreground text-sm">{tip.description}</p>
+                      </div>
+                    </motion.li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       </main>
       

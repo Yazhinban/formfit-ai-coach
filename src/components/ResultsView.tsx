@@ -3,8 +3,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle2, AlertTriangle, ChevronRight, Activity, BarChart, Copy, Share2 } from 'lucide-react';
 import { Button } from './ui/button';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from './ui/chart';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from 'recharts';
 
 interface FormIssue {
   part: string;
@@ -25,19 +23,6 @@ interface ResultsViewProps {
   };
 }
 
-// Sample movement data for the graph
-const generateMovementData = () => {
-  const data = [];
-  for (let i = 0; i < 20; i++) {
-    const value = Math.floor(50 + Math.sin(i * 0.5) * 30 * Math.random());
-    data.push({
-      time: i,
-      angle: value,
-    });
-  }
-  return data;
-};
-
 const ResultsView: React.FC<ResultsViewProps> = ({ exercise, score, issues = [], reps, metrics }) => {
   // Ensure issues is always an array
   const safeIssues = Array.isArray(issues) ? issues : [];
@@ -47,9 +32,6 @@ const ResultsView: React.FC<ResultsViewProps> = ({ exercise, score, issues = [],
   
   // State for showing/hiding the movement graph
   const [showMovementGraph, setShowMovementGraph] = useState(true);
-  
-  // Generate movement data for the graph
-  const movementData = generateMovementData();
   
   return (
     <div className="space-y-4">
@@ -112,40 +94,6 @@ const ResultsView: React.FC<ResultsViewProps> = ({ exercise, score, issues = [],
               </div>
             )}
             
-            {showMovementGraph && (
-              <div className="mt-4">
-                <div className="text-sm font-medium mb-2 flex items-center gap-1">
-                  <Activity size={16} />
-                  <span>Movement Analysis</span>
-                </div>
-                <div className="bg-muted/30 rounded-md p-2" style={{ height: '180px' }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={movementData}
-                      margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#888" opacity={0.2} />
-                      <XAxis dataKey="time" tick={{ fontSize: 10 }} label={{ value: 'Time (s)', position: 'insideBottom', offset: -5, fontSize: 10 }} />
-                      <YAxis tick={{ fontSize: 10 }} label={{ value: 'Angle (°)', angle: -90, position: 'insideLeft', fontSize: 10 }} />
-                      <Tooltip 
-                        formatter={(value) => [`${value}°`, 'Angle']}
-                        labelFormatter={(label) => `Time: ${label}s`}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="angle" 
-                        stroke="hsl(var(--primary))" 
-                        strokeWidth={2} 
-                        dot={{ r: 2 }} 
-                        activeDot={{ r: 4 }} 
-                        animationDuration={500}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            )}
-            
             {safeIssues.length > 0 ? (
               <div className="space-y-3">
                 <h3 className="font-medium text-sm text-muted-foreground">Form Corrections:</h3>
@@ -173,17 +121,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ exercise, score, issues = [],
               <p className="text-muted-foreground text-sm">No form issues detected.</p>
             )}
             
-            <div className="flex justify-between mt-4">
-              <Button 
-                variant={showMovementGraph ? "default" : "outline"} 
-                size="sm" 
-                className="flex items-center gap-2"
-                onClick={() => setShowMovementGraph(!showMovementGraph)}
-              >
-                {showMovementGraph ? <BarChart size={16} /> : <Activity size={16} />}
-                {showMovementGraph ? "Hide Movement Graph" : "View Movement Graph"}
-              </Button>
-              
+            <div className="flex justify-end mt-4">
               <Button variant="outline" size="sm" className="flex items-center gap-2">
                 <Share2 size={16} /> Share Results
               </Button>
