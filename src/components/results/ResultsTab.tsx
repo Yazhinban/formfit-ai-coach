@@ -135,14 +135,14 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
       4. Hydration: Drink at least 8 glasses of water daily
       5. Timing: Consider eating protein within 30 minutes after workouts
       
-      Remember that consistency is more important than perfection!";
+      Remember that consistency is more important than perfection!`;
     } 
     else if (message.toLowerCase().includes('sets') || message.toLowerCase().includes('reps')) {
       return `Optimal sets and reps depend on your goals:
       
-      • Strength: 4-6 sets of 3-5 reps (heavy weight, longer rest)
-      • Muscle growth: 3-4 sets of 8-12 reps (moderate weight)
-      • Endurance: 2-3 sets of 15-20 reps (lighter weight, shorter rest)
+      - Strength: 4-6 sets of 3-5 reps (heavy weight, longer rest)
+      - Muscle growth: 3-4 sets of 8-12 reps (moderate weight)
+      - Endurance: 2-3 sets of 15-20 reps (lighter weight, shorter rest)
       
       For ${workoutType || 'most exercises'}, I'd recommend starting with 3 sets of 8-12 reps with a weight that challenges you by the last few reps.`;
     }
@@ -202,7 +202,7 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-48 w-full">
+                  <div className="h-40 w-full">
                     <ChartContainer
                       config={{
                         angle: {
@@ -215,7 +215,7 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
                       }}
                     >
                       <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                        <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -5, bottom: 0 }}>
                           <defs>
                             <linearGradient id="colorAngle" x1="0" y1="0" x2="0" y2="1">
                               <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
@@ -224,11 +224,11 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
                           </defs>
                           <XAxis 
                             dataKey="time" 
-                            tick={{ fontSize: 12 }} 
+                            tick={{ fontSize: 10 }} 
                             tickFormatter={(value) => `${value}s`}
                           />
                           <YAxis 
-                            tick={{ fontSize: 12 }} 
+                            tick={{ fontSize: 10 }} 
                             domain={['auto', 'auto']} 
                             tickFormatter={(value) => `${value}°`}
                           />
