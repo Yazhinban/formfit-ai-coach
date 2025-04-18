@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -136,7 +135,7 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
       4. Hydration: Drink at least 8 glasses of water daily
       5. Timing: Consider eating protein within 30 minutes after workouts
       
-      Remember that consistency is more important than perfection!`;
+      Remember that consistency is more important than perfection!";
     } 
     else if (message.toLowerCase().includes('sets') || message.toLowerCase().includes('reps')) {
       return `Optimal sets and reps depend on your goals:
@@ -203,7 +202,7 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-64 w-full">
+                  <div className="h-48 w-full">
                     <ChartContainer
                       config={{
                         angle: {
