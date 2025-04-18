@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +11,7 @@ import WorkoutPlan from "./pages/WorkoutPlan";
 import CalendarPage from "./pages/CalendarPage";
 import ProgressPage from "./pages/ProgressPage";
 import NutritionTips from "./pages/NutritionTips";
+import RecommendedPlans from "./pages/RecommendedPlans";
 
 const queryClient = new QueryClient();
 
@@ -26,10 +26,10 @@ const App = () => (
           <Route path="/form-analyzer" element={<FormAnalyzer />} />
           <Route path="/personal-info" element={<PersonalInfo />} />
           <Route path="/workout-plan" element={<WorkoutPlan />} />
+          <Route path="/recommended-plans" element={<RecommendedPlans />} />
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/nutrition-tips" element={<NutritionTips />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

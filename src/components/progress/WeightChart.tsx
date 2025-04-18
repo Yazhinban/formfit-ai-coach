@@ -19,16 +19,15 @@ interface WeightChartProps {
 const WeightChart: React.FC<WeightChartProps> = ({ filteredData }) => {
   const chartData = filteredData.map(entry => ({
     date: new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    weight: entry.weight,
-    formScore: entry.formScore,
+    weight: entry.weight || 0,
     equipmentWeight: entry.equipmentWeight || 0,
     workout: entry.workout || 'Not specified',
     exercise: entry.exerciseType || 'Unknown exercise'
   }));
 
-  const weights = chartData.map(item => item.weight).filter(Boolean) as number[];
-  const minWeight = weights.length > 0 ? Math.max(0, Math.min(...weights) - 5) : 0;
-  const maxWeight = weights.length > 0 ? Math.max(...weights) + 5 : 100;
+  const allWeights = chartData.flatMap(item => [item.weight, item.equipmentWeight]).filter(Boolean);
+  const minWeight = allWeights.length > 0 ? Math.max(0, Math.min(...allWeights) - 5) : 0;
+  const maxWeight = allWeights.length > 0 ? Math.max(...allWeights) + 5 : 100;
 
   return (
     <motion.div 
@@ -64,7 +63,7 @@ const WeightChart: React.FC<WeightChartProps> = ({ filteredData }) => {
               axisLine={{ stroke: '#e5e7eb' }}
             />
             <YAxis 
-              domain={[minWeight > 0 ? minWeight : 'auto', 'auto']}
+              domain={[minWeight, maxWeight]}
               tick={{ fontSize: 10 }} 
               tickMargin={8}
               axisLine={{ stroke: '#e5e7eb' }}

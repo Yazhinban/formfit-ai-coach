@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import Header from '@/components/Header';
 import WeeklyWorkingPlan from '@/components/WeeklyWorkingPlan';
 import { Button } from '@/components/ui/button';
-import { VideoIcon } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { VideoIcon, BookOpen } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface WorkoutPlan {
   id: string;
@@ -17,6 +16,7 @@ interface WorkoutPlan {
 }
 
 const WorkoutPlanPage = () => {
+  const navigate = useNavigate();
   const [workingPlans, setWorkingPlans] = React.useState<WorkoutPlan[]>([
     {
       id: uuidv4(),
@@ -79,12 +79,20 @@ const WorkoutPlanPage = () => {
             <h1 className="text-3xl font-bold mb-2">Weekly Workout Plan</h1>
             <p className="text-muted-foreground">Schedule and manage your weekly workouts</p>
           </div>
-          <Link to="/form-analyzer">
-            <Button className="flex items-center gap-2" size="lg">
-              <VideoIcon className="h-5 w-5" /> 
-              Go to Form Analyzer
-            </Button>
-          </Link>
+          <div className="flex gap-4">
+            <Link to="/form-analyzer">
+              <Button className="flex items-center gap-2" variant="outline">
+                <VideoIcon className="h-5 w-5" /> 
+                Form Analyzer
+              </Button>
+            </Link>
+            <Link to="/recommended-plans">
+              <Button className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5" />
+                View Recommended Plans
+              </Button>
+            </Link>
+          </div>
         </div>
         
         <div className="max-w-4xl mx-auto">

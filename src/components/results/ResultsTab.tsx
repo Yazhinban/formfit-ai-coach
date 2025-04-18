@@ -1,27 +1,15 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Share2, Copy, Facebook, Twitter, Linkedin } from 'lucide-react';
 import ResultsView from '@/components/ResultsView';
 import ChatInterface from '@/components/ChatInterface';
-import { ChartContainer } from '@/components/ui/chart';
-import { 
-  Area, 
-  AreaChart, 
-  ResponsiveContainer, 
-  XAxis, 
-  YAxis,
-  CartesianGrid,
-  Tooltip
-} from 'recharts';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { toast } from '@/hooks/use-toast';
-import { motion } from 'framer-motion';
 
 interface ResultsTabProps {
   analysisComplete: boolean;
@@ -38,17 +26,9 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
   onNavigateToAnalyze,
   workoutType,
 }) => {
-  const [showGraph, setShowGraph] = useState(true);
-
   const safeResult = analysisResult || {};
   const safeIssues = safeResult.issues || [];
   const safeMetrics = safeResult.metrics || {};
-  const angleData = safeResult.angleData || [];
-
-  const chartData = angleData.length > 0 ? angleData : Array.from({ length: 30 }, (_, i) => ({
-    time: i,
-    angle: 90 + Math.sin(i * 0.3) * 40 + (Math.random() * 10 - 5)
-  }));
 
   const handleShare = (platform: string) => {
     const exerciseName = workoutType || safeResult.exercise || 'my workout';
@@ -161,93 +141,23 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2">
         {analysisComplete && safeResult ? (
-          <>
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>{workoutType || safeResult.exercise || 'Workout'} Analysis</CardTitle>
-                <CardDescription>
-                  Form assessment and recommendations
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResultsView 
-                  exercise={workoutType || safeResult.exercise || 'Unknown Exercise'}
-                  score={safeResult.score || 0}
-                  issues={safeIssues}
-                  reps={safeResult.reps || 0}
-                  metrics={safeMetrics}
-                />
-              </CardContent>
-            </Card>
-            
-            {showGraph && (
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle>Movement Analysis</CardTitle>
-                  <CardDescription>
-                    Joint angle changes during your {workoutType || safeResult.exercise || 'workout'}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <motion.div 
-                    className="h-32 w-full"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <ChartContainer
-                      config={{
-                        angle: {
-                          label: "Angle",
-                          color: "hsl(var(--primary))"
-                        },
-                        grid: {
-                          color: "hsl(var(--border))"
-                        }
-                      }}
-                    >
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -5, bottom: 0 }}>
-                          <defs>
-                            <linearGradient id="colorAngle" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                              <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                            </linearGradient>
-                          </defs>
-                          <XAxis 
-                            dataKey="time" 
-                            tick={{ fontSize: 10 }} 
-                            tickFormatter={(value) => `${value}s`}
-                          />
-                          <YAxis 
-                            tick={{ fontSize: 10 }} 
-                            domain={['auto', 'auto']} 
-                            tickFormatter={(value) => `${value}°`}
-                          />
-                          <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
-                          <Tooltip 
-                            formatter={(value: any) => [`${value}°`, 'Joint Angle']}
-                            labelFormatter={(label: any) => `Time: ${label}s`}
-                          />
-                          <Area 
-                            type="monotone" 
-                            dataKey="angle" 
-                            name="angle" 
-                            stroke="hsl(var(--primary))" 
-                            fillOpacity={1}
-                            fill="url(#colorAngle)"
-                          />
-                        </AreaChart>
-                      </ResponsiveContainer>
-                    </ChartContainer>
-                  </motion.div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    This graph shows the change in joint angles during your workout, highlighting form consistency.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </>
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>{workoutType || safeResult.exercise || 'Workout'} Analysis</CardTitle>
+              <CardDescription>
+                Form assessment and recommendations
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResultsView 
+                exercise={workoutType || safeResult.exercise || 'Unknown Exercise'}
+                score={safeResult.score || 0}
+                issues={safeIssues}
+                reps={safeResult.reps || 0}
+                metrics={safeMetrics}
+              />
+            </CardContent>
+          </Card>
         ) : (
           <Card>
             <CardHeader>
@@ -279,45 +189,35 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
           Back to Analysis
         </Button>
         
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            onClick={() => setShowGraph(!showGraph)}
-            className="flex items-center gap-2"
-          >
-            {showGraph ? 'Hide Movement Graph' : 'View Movement Graph'}
-          </Button>
-          
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
-                <Share2 size={16} />
-                Share Results
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-56" align="end">
-              <div className="grid gap-3">
-                <h4 className="font-medium text-sm">Share via</h4>
-                <div className="flex items-center gap-2">
-                  <Button size="sm" variant="outline" className="flex-1" onClick={() => handleShare('facebook')}>
-                    <Facebook size={16} className="mr-2" /> Facebook
-                  </Button>
-                  <Button size="sm" variant="outline" className="flex-1" onClick={() => handleShare('twitter')}>
-                    <Twitter size={16} className="mr-2" /> Twitter
-                  </Button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button size="sm" variant="outline" className="flex-1" onClick={() => handleShare('linkedin')}>
-                    <Linkedin size={16} className="mr-2" /> LinkedIn
-                  </Button>
-                  <Button size="sm" variant="outline" className="flex-1" onClick={() => handleShare('copy')}>
-                    <Copy size={16} className="mr-2" /> Copy Link
-                  </Button>
-                </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Share2 size={16} />
+              Share Results
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-56" align="end">
+            <div className="grid gap-3">
+              <h4 className="font-medium text-sm">Share via</h4>
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="outline" className="flex-1" onClick={() => handleShare('facebook')}>
+                  <Facebook size={16} className="mr-2" /> Facebook
+                </Button>
+                <Button size="sm" variant="outline" className="flex-1" onClick={() => handleShare('twitter')}>
+                  <Twitter size={16} className="mr-2" /> Twitter
+                </Button>
               </div>
-            </PopoverContent>
-          </Popover>
-        </div>
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="outline" className="flex-1" onClick={() => handleShare('linkedin')}>
+                  <Linkedin size={16} className="mr-2" /> LinkedIn
+                </Button>
+                <Button size="sm" variant="outline" className="flex-1" onClick={() => handleShare('copy')}>
+                  <Copy size={16} className="mr-2" /> Copy Link
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
     </div>
   );
