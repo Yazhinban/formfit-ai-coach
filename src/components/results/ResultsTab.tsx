@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Share2, Copy, Facebook, Twitter, Linkedin, ChevronRight } from 'lucide-react';
+import { Share2, Copy, Facebook, Twitter, Linkedin } from 'lucide-react';
 import ResultsView from '@/components/ResultsView';
 import ChatInterface from '@/components/ChatInterface';
 import { ChartContainer } from '@/components/ui/chart';
@@ -128,16 +129,10 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
       4. Hydration: Drink at least 8 glasses of water daily
       5. Timing: Consider eating protein within 30 minutes after workouts
       
-      Remember that consistency is more important than perfection!";
+      Remember that consistency is more important than perfection!`;
     } 
     else if (message.toLowerCase().includes('sets') || message.toLowerCase().includes('reps')) {
-      return `Optimal sets and reps depend on your goals:
-      
-      - Strength: 4-6 sets of 3-5 reps (heavy weight, longer rest)
-      - Muscle growth: 3-4 sets of 8-12 reps (moderate weight)
-      - Endurance: 2-3 sets of 15-20 reps (lighter weight, shorter rest)
-      
-      For ${workoutType || 'most exercises'}, I'd recommend starting with 3 sets of 8-12 reps with a weight that challenges you by the last few reps.`;
+      return "Optimal sets and reps depend on your goals: \n\n- Strength: 4-6 sets of 3-5 reps (heavy weight, longer rest)\n- Muscle growth: 3-4 sets of 8-12 reps (moderate weight)\n- Endurance: 2-3 sets of 15-20 reps (lighter weight, shorter rest)\n\nFor " + (workoutType || 'most exercises') + ", I'd recommend starting with 3 sets of 8-12 reps with a weight that challenges you by the last few reps.";
     }
     else if (message.toLowerCase().includes('improve') || message.toLowerCase().includes('better')) {
       if (analysisComplete && safeIssues.length > 0) {
