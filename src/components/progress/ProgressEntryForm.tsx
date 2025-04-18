@@ -3,10 +3,11 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { ProgressEntry } from './types';
 import { motion } from 'framer-motion';
-import { Plus } from 'lucide-react';
+import { Plus, Weight } from 'lucide-react';
 
 interface ProgressEntryFormProps {
   onAddEntry: (entry: Partial<ProgressEntry>) => void;
@@ -16,8 +17,9 @@ const ProgressEntryForm: React.FC<ProgressEntryFormProps> = ({ onAddEntry }) => 
   const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [weight, setWeight] = useState<number | undefined>(undefined);
   const [workout, setWorkout] = useState<string>('');
-  const [formScore, setFormScore] = useState<number | undefined>(undefined);
-  const [exerciseType, setExerciseType] = useState<string>('');
+  const [equipmentWeight, setEquipmentWeight] = useState<number | undefined>(undefined);
+  const [weightUnit, setWeightUnit] = useState<'kg' | 'lbs'>('kg');
+  const [equipmentUnit, setEquipmentUnit] = useState<'kg' | 'lbs'>('kg');
   const [notes, setNotes] = useState<string>('');
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
@@ -26,18 +28,16 @@ const ProgressEntryForm: React.FC<ProgressEntryFormProps> = ({ onAddEntry }) => 
     
     onAddEntry({
       date,
-      weight,
+      weight: weight ? (weightUnit === 'kg' ? weight : weight / 2.20462) : undefined,
       workout,
-      formScore,
-      exerciseType,
+      equipmentWeight: equipmentWeight ? (equipmentUnit === 'kg' ? equipmentWeight : equipmentWeight / 2.20462) : undefined,
       notes: notes.trim() ? notes : undefined
     });
     
     // Reset form
     setWeight(undefined);
     setWorkout('');
-    setFormScore(undefined);
-    setExerciseType('');
+    setEquipmentWeight(undefined);
     setNotes('');
     setIsExpanded(false);
   };
@@ -82,14 +82,26 @@ const ProgressEntryForm: React.FC<ProgressEntryFormProps> = ({ onAddEntry }) => 
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="weight">Weight (lbs)</Label>
-                <Input 
-                  type="number" 
-                  id="weight" 
-                  placeholder="Enter weight" 
-                  value={weight || ''} 
-                  onChange={(e) => setWeight(e.target.value ? Number(e.target.value) : undefined)}
-                />
+                <Label htmlFor="weight">Body Weight</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    type="number" 
+                    id="weight" 
+                    placeholder="Enter weight" 
+                    value={weight || ''} 
+                    onChange={(e) => setWeight(e.target.value ? Number(e.target.value) : undefined)}
+                    className="flex-1"
+                  />
+                  <Select value={weightUnit} onValueChange={(value: 'kg' | 'lbs') => setWeightUnit(value)}>
+                    <SelectTrigger className="w-[80px]">
+                      <SelectValue>{weightUnit.toUpperCase()}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="kg">KG</SelectItem>
+                      <SelectItem value="lbs">LBS</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
             
@@ -105,28 +117,26 @@ const ProgressEntryForm: React.FC<ProgressEntryFormProps> = ({ onAddEntry }) => 
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="formScore">Form Score (0-100)</Label>
-                <Input 
-                  type="number"
-                  min="0"
-                  max="100" 
-                  id="formScore" 
-                  placeholder="Enter form score" 
-                  value={formScore || ''} 
-                  onChange={(e) => setFormScore(e.target.value ? Number(e.target.value) : undefined)}
-                />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="exerciseType">Exercise Analyzed</Label>
-                <Input 
-                  id="exerciseType" 
-                  placeholder="e.g. Squat, Deadlift, etc." 
-                  value={exerciseType} 
-                  onChange={(e) => setExerciseType(e.target.value)}
-                />
+                <Label htmlFor="equipmentWeight">Equipment Weight</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    type="number"
+                    id="equipmentWeight" 
+                    placeholder="Enter weight" 
+                    value={equipmentWeight || ''} 
+                    onChange={(e) => setEquipmentWeight(e.target.value ? Number(e.target.value) : undefined)}
+                    className="flex-1"
+                  />
+                  <Select value={equipmentUnit} onValueChange={(value: 'kg' | 'lbs') => setEquipmentUnit(value)}>
+                    <SelectTrigger className="w-[80px]">
+                      <SelectValue>{equipmentUnit.toUpperCase()}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="kg">KG</SelectItem>
+                      <SelectItem value="lbs">LBS</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
             

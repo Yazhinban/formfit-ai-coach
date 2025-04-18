@@ -1,16 +1,17 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Scale } from 'lucide-react';
 
 interface WeightChangeIndicatorProps {
   weightChangePercent: number;
 }
 
 const WeightChangeIndicator: React.FC<WeightChangeIndicatorProps> = ({ weightChangePercent }) => {
-  // Determine the appropriate color based on weight change
+  const [unit, setUnit] = useState<'kg' | 'lbs'>('kg');
+  
   const getColorClasses = () => {
     if (weightChangePercent > 0) {
       return {
@@ -40,22 +41,19 @@ const WeightChangeIndicator: React.FC<WeightChangeIndicatorProps> = ({ weightCha
       className="space-y-3 bg-background p-4 rounded-lg border shadow-sm"
     >
       <div className="flex justify-between items-center">
-        <Label className="text-sm font-medium">Weight Change</Label>
-        <motion.span 
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 500, delay: 0.2 }}
-          className={`flex items-center gap-1.5 text-sm font-medium rounded-full px-2.5 py-1 ${colors.badge}`}
-        >
-          {weightChangePercent > 0 ? (
-            <TrendingUp className="h-3.5 w-3.5" />
-          ) : weightChangePercent < 0 ? (
-            <TrendingDown className="h-3.5 w-3.5" />
-          ) : (
-            <Minus className="h-3.5 w-3.5" />
-          )}
-          {Math.abs(weightChangePercent).toFixed(1)}%
-        </motion.span>
+        <div className="flex items-center gap-2">
+          <Scale className="h-4 w-4 text-muted-foreground" />
+          <Label className="text-sm font-medium">Weight</Label>
+        </div>
+        <Select value={unit} onValueChange={(value: 'kg' | 'lbs') => setUnit(value)}>
+          <SelectTrigger className="w-[80px] h-8">
+            <SelectValue>{unit.toUpperCase()}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="kg">KG</SelectItem>
+            <SelectItem value="lbs">LBS</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <motion.div
         initial={{ width: 0 }}

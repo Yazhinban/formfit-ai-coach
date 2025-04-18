@@ -1,9 +1,9 @@
-
 export interface ProgressEntry {
   id: string;
   date: string;
   weight?: number;
   workout?: string;
+  equipmentWeight?: number;
   formScore?: number; // Added form score from video analysis
   exerciseType?: string; // Type of exercise analyzed
   notes?: string;
