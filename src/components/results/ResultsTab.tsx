@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Share2, Copy, Facebook, Twitter, Linkedin } from 'lucide-react';
+import { Share2, Copy, Facebook, Twitter, Linkedin, ChevronRight } from 'lucide-react';
 import ResultsView from '@/components/ResultsView';
 import ChatInterface from '@/components/ChatInterface';
 import { ChartContainer } from '@/components/ui/chart';
