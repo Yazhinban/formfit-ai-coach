@@ -7,7 +7,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer
 } from 'recharts';
 import { motion } from 'framer-motion';
@@ -22,7 +21,7 @@ const WeightChart: React.FC<WeightChartProps> = ({ filteredData }) => {
     date: new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     weight: entry.weight,
     formScore: entry.formScore,
-    equipmentWeight: entry.equipmentWeight,
+    equipmentWeight: entry.equipmentWeight || 0,
     workout: entry.workout || 'Not specified',
     exercise: entry.exerciseType || 'Unknown exercise'
   }));
@@ -44,7 +43,7 @@ const WeightChart: React.FC<WeightChartProps> = ({ filteredData }) => {
           <div className="flex items-center gap-4 text-xs">
             <div className="flex items-center gap-1">
               <div className="w-3 h-3 rounded-full bg-blue-500/80"></div>
-              <span>Weight</span>
+              <span>Body Weight</span>
             </div>
             <div className="flex items-center gap-1">
               <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
@@ -80,6 +79,7 @@ const WeightChart: React.FC<WeightChartProps> = ({ filteredData }) => {
             <Line 
               type="monotone" 
               dataKey="weight" 
+              name="Body Weight"
               stroke="#0EA5E9" 
               strokeWidth={2}
               dot={{ r: 3, strokeWidth: 2, fill: 'white' }}
@@ -88,57 +88,11 @@ const WeightChart: React.FC<WeightChartProps> = ({ filteredData }) => {
             <Line 
               type="monotone" 
               dataKey="equipmentWeight" 
+              name="Equipment Weight"
               stroke="#EAB308" 
               strokeWidth={2}
               dot={{ r: 3, strokeWidth: 2, fill: 'white' }}
               activeDot={{ r: 5, stroke: '#EAB308', strokeWidth: 2, fill: 'white' }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div className="h-[220px] w-full bg-gradient-to-r from-background to-muted/5 p-3 rounded-lg border shadow-sm">
-        <div className="mb-2 flex justify-between items-center">
-          <h3 className="text-sm font-medium">Form Progress</h3>
-          <div className="flex items-center gap-4 text-xs">
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
-              <span>Form Score</span>
-            </div>
-          </div>
-        </div>
-        <ResponsiveContainer width="100%" height="85%">
-          <LineChart
-            data={chartData}
-            margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-            <XAxis 
-              dataKey="date" 
-              tick={{ fontSize: 10 }} 
-              tickMargin={8}
-              axisLine={{ stroke: '#e5e7eb' }}
-            />
-            <YAxis 
-              domain={[0, 100]}
-              tick={{ fontSize: 10 }} 
-              tickMargin={8}
-              axisLine={{ stroke: '#e5e7eb' }}
-            />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'hsl(var(--background))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '8px'
-              }}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="formScore" 
-              stroke="#22C55E" 
-              strokeWidth={2}
-              dot={{ r: 3, strokeWidth: 2, fill: 'white' }}
-              activeDot={{ r: 5, stroke: '#22C55E', strokeWidth: 2, fill: 'white' }}
             />
           </LineChart>
         </ResponsiveContainer>

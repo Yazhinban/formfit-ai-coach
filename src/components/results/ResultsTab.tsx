@@ -20,6 +20,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { toast } from '@/hooks/use-toast';
+import { motion } from 'framer-motion';
 
 interface ResultsTabProps {
   analysisComplete: boolean;
@@ -36,21 +37,18 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
   onNavigateToAnalyze,
   workoutType,
 }) => {
-  const [showGraph, setShowGraph] = useState(true); // Set to true by default
-  
-  // Ensure we have valid data to work with
+  const [showGraph, setShowGraph] = useState(true);
+
   const safeResult = analysisResult || {};
   const safeIssues = safeResult.issues || [];
   const safeMetrics = safeResult.metrics || {};
   const angleData = safeResult.angleData || [];
-  
-  // Create chart data from angle data or generate simulated data if none exists
+
   const chartData = angleData.length > 0 ? angleData : Array.from({ length: 30 }, (_, i) => ({
     time: i,
     angle: 90 + Math.sin(i * 0.3) * 40 + (Math.random() * 10 - 5)
   }));
 
-  // Handle sharing functionality
   const handleShare = (platform: string) => {
     const exerciseName = workoutType || safeResult.exercise || 'my workout';
     const score = safeResult.score ? Math.round(safeResult.score) : 0;
@@ -83,17 +81,13 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
     }
   };
 
-  // Enhanced message handling for the AI coach
   const handleEnhancedMessage = async (message: string): Promise<string> => {
-    // Attempt to interpret the message more effectively
     let context = "";
     
-    // Add workout type context if available
     if (workoutType) {
       context += `The user is currently analyzing their ${workoutType} workout. `;
     }
     
-    // Add analysis context if available
     if (analysisComplete && safeResult) {
       context += `Their form score is ${Math.round(safeResult.score || 0)}/100. `;
       
@@ -102,7 +96,6 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
       }
     }
     
-    // Route specific question types to more detailed responses
     if (message.toLowerCase().includes('workout plan')) {
       return `Here's a balanced weekly workout plan:
       Monday: Upper body (bench press, rows, shoulder press)
@@ -135,7 +128,7 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
       4. Hydration: Drink at least 8 glasses of water daily
       5. Timing: Consider eating protein within 30 minutes after workouts
       
-      Remember that consistency is more important than perfection!`;
+      Remember that consistency is more important than perfection!";
     } 
     else if (message.toLowerCase().includes('sets') || message.toLowerCase().includes('reps')) {
       return `Optimal sets and reps depend on your goals:
@@ -166,10 +159,9 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
       }
     }
     
-    // Fall back to the original message handling if no specific pattern matched
     return onSendMessage(message);
   };
-  
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2">
@@ -202,7 +194,12 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-40 w-full">
+                  <motion.div 
+                    className="h-32 w-full"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
                     <ChartContainer
                       config={{
                         angle: {
@@ -248,50 +245,13 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
                         </AreaChart>
                       </ResponsiveContainer>
                     </ChartContainer>
-                  </div>
+                  </motion.div>
                   <p className="text-xs text-muted-foreground mt-2">
                     This graph shows the change in joint angles during your workout, highlighting form consistency.
                   </p>
                 </CardContent>
               </Card>
             )}
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Improvement Tips</CardTitle>
-                <CardDescription>
-                  Suggested exercises and corrections
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {Array.isArray(safeIssues) && safeIssues.length > 0 ? (
-                  <ul className="space-y-3">
-                    {safeIssues.map((issue: any, i: number) => (
-                      <li key={i} className="flex items-start gap-3">
-                        <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-0.5"
-                             style={{
-                               backgroundColor: issue.severity === 'high' ? 'rgba(239, 68, 68, 0.2)' : 
-                                               issue.severity === 'medium' ? 'rgba(245, 158, 11, 0.2)' : 
-                                               'rgba(34, 211, 238, 0.2)'
-                             }}>
-                          <ChevronRight className="h-4 w-4" style={{
-                            color: issue.severity === 'high' ? 'rgb(239, 68, 68)' : 
-                                   issue.severity === 'medium' ? 'rgb(245, 158, 11)' : 
-                                   'rgb(34, 211, 238)'
-                          }} />
-                        </div>
-                        <div>
-                          <h4 className="font-medium">Fix: {issue.issue}</h4>
-                          <p className="text-sm text-muted-foreground">{issue.suggestion || 'Maintain proper form and alignment.'}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-muted-foreground">No specific issues detected. Keep up the good work!</p>
-                )}
-              </CardContent>
-            </Card>
           </>
         ) : (
           <Card>

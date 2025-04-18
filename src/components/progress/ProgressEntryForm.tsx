@@ -4,23 +4,36 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { ProgressEntry } from './types';
 import { motion } from 'framer-motion';
-import { Plus, Weight } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 interface ProgressEntryFormProps {
   onAddEntry: (entry: Partial<ProgressEntry>) => void;
 }
 
+const exerciseOptions = [
+  'Squat',
+  'Deadlift',
+  'Bench Press',
+  'Push-up',
+  'Pull-up',
+  'Overhead Press',
+  'Barbell Row',
+  'Lunges',
+  'Plank',
+  'Other'
+];
+
 const ProgressEntryForm: React.FC<ProgressEntryFormProps> = ({ onAddEntry }) => {
   const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [weight, setWeight] = useState<number | undefined>(undefined);
   const [workout, setWorkout] = useState<string>('');
+  const [exerciseType, setExerciseType] = useState<string>('');
+  const [formScore, setFormScore] = useState<number | undefined>(undefined);
   const [equipmentWeight, setEquipmentWeight] = useState<number | undefined>(undefined);
   const [weightUnit, setWeightUnit] = useState<'kg' | 'lbs'>('kg');
   const [equipmentUnit, setEquipmentUnit] = useState<'kg' | 'lbs'>('kg');
-  const [notes, setNotes] = useState<string>('');
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -30,15 +43,17 @@ const ProgressEntryForm: React.FC<ProgressEntryFormProps> = ({ onAddEntry }) => 
       date,
       weight: weight ? (weightUnit === 'kg' ? weight : weight / 2.20462) : undefined,
       workout,
+      exerciseType,
+      formScore,
       equipmentWeight: equipmentWeight ? (equipmentUnit === 'kg' ? equipmentWeight : equipmentWeight / 2.20462) : undefined,
-      notes: notes.trim() ? notes : undefined
     });
     
     // Reset form
     setWeight(undefined);
     setWorkout('');
+    setExerciseType('');
+    setFormScore(undefined);
     setEquipmentWeight(undefined);
-    setNotes('');
     setIsExpanded(false);
   };
 
@@ -117,6 +132,24 @@ const ProgressEntryForm: React.FC<ProgressEntryFormProps> = ({ onAddEntry }) => 
               </div>
               
               <div className="space-y-2">
+                <Label htmlFor="exercise">Exercise</Label>
+                <Select value={exerciseType} onValueChange={setExerciseType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select exercise" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {exerciseOptions.map((exercise) => (
+                      <SelectItem key={exercise} value={exercise.toLowerCase()}>
+                        {exercise}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
                 <Label htmlFor="equipmentWeight">Equipment Weight</Label>
                 <div className="flex gap-2">
                   <Input 
@@ -138,17 +171,24 @@ const ProgressEntryForm: React.FC<ProgressEntryFormProps> = ({ onAddEntry }) => 
                   </Select>
                 </div>
               </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="notes">Notes (optional)</Label>
-              <Textarea 
-                id="notes" 
-                placeholder="Add any additional notes..." 
-                value={notes} 
-                onChange={(e) => setNotes(e.target.value)}
-                rows={3}
-              />
+
+              <div className="space-y-2">
+                <Label htmlFor="formScore">Form Score</Label>
+                <Input 
+                  type="number"
+                  id="formScore"
+                  placeholder="Enter form score (0-100)"
+                  value={formScore || ''}
+                  onChange={(e) => {
+                    const value = e.target.value ? Number(e.target.value) : undefined;
+                    if (value === undefined || (value >= 0 && value <= 100)) {
+                      setFormScore(value);
+                    }
+                  }}
+                  min="0"
+                  max="100"
+                />
+              </div>
             </div>
             
             <div className="flex justify-end gap-2">
