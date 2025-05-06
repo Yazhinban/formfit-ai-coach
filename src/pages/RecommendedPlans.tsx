@@ -5,10 +5,70 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ArrowLeft, Download } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from "@/hooks/use-toast";
+
+interface WorkoutPlan {
+  day: string;
+  focus: string;
+  exercises: string;
+  duration: string;
+}
+
+const beginnerPlan: WorkoutPlan[] = [
+  { day: 'Monday', focus: 'Full Body', exercises: 'Squats, Push-ups, Rows', duration: '45 min' },
+  { day: 'Tuesday', focus: 'Rest/Cardio', exercises: 'Walking, Light Cycling', duration: '30 min' },
+  { day: 'Wednesday', focus: 'Full Body', exercises: 'Lunges, Shoulder Press, Planks', duration: '45 min' },
+  { day: 'Thursday', focus: 'Rest/Mobility', exercises: 'Stretching, Yoga', duration: '30 min' },
+  { day: 'Friday', focus: 'Full Body', exercises: 'Deadlifts, Bench Press, Core', duration: '45 min' },
+  { day: 'Saturday', focus: 'Active Recovery', exercises: 'Swimming, Light Cardio', duration: '40 min' },
+  { day: 'Sunday', focus: 'Rest', exercises: 'Complete Rest', duration: '-' },
+];
+
+const intermediatePlan: WorkoutPlan[] = [
+  { day: 'Monday', focus: 'Push', exercises: 'Bench Press, Shoulder Press, Triceps', duration: '60 min' },
+  { day: 'Tuesday', focus: 'Pull', exercises: 'Rows, Pull-ups, Biceps', duration: '60 min' },
+  { day: 'Wednesday', focus: 'Legs', exercises: 'Squats, Deadlifts, Lunges', duration: '60 min' },
+  { day: 'Thursday', focus: 'Upper Body', exercises: 'Push-ups, Dips, Lateral Raises', duration: '60 min' },
+  { day: 'Friday', focus: 'Lower Body', exercises: 'Front Squats, RDLs, Calf Raises', duration: '60 min' },
+  { day: 'Saturday', focus: 'HIIT/Core', exercises: 'Circuit Training, Abs Work', duration: '45 min' },
+  { day: 'Sunday', focus: 'Rest', exercises: 'Active Recovery or Rest', duration: '-' },
+];
+
+const proPlan: WorkoutPlan[] = [
+  { day: 'Monday', focus: 'Push Power', exercises: 'Bench Press, OHP, Advanced Push', duration: '75 min' },
+  { day: 'Tuesday', focus: 'Pull Power', exercises: 'Deadlifts, Weighted Pull-ups, Rows', duration: '75 min' },
+  { day: 'Wednesday', focus: 'Legs Power', exercises: 'Squat Variations, Olympic Lifts', duration: '75 min' },
+  { day: 'Thursday', focus: 'Push Hypertrophy', exercises: 'Volume Push Work, Isolation', duration: '70 min' },
+  { day: 'Friday', focus: 'Pull Hypertrophy', exercises: 'Back Volume, Grip Work', duration: '70 min' },
+  { day: 'Saturday', focus: 'Legs Hypertrophy', exercises: 'Leg Volume, Plyometrics', duration: '70 min' },
+  { day: 'Sunday', focus: 'Recovery', exercises: 'Mobility Work, Light Cardio', duration: '45 min' },
+];
 
 const RecommendedPlans = () => {
+  const navigate = useNavigate();
+
+  const handleLoadPlan = (planType: string) => {
+    // Store the selected plan in localStorage
+    const planToSave = planType === 'beginner' 
+      ? beginnerPlan 
+      : planType === 'intermediate' 
+        ? intermediatePlan 
+        : proPlan;
+    
+    localStorage.setItem('selectedWorkoutPlan', JSON.stringify(planToSave));
+    
+    // Show success toast
+    toast({
+      title: "Plan loaded successfully",
+      description: `The ${planType} plan has been loaded to your workout plan.`,
+    });
+    
+    // Navigate to workout plan page
+    navigate('/workout-plan');
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
@@ -37,80 +97,64 @@ const RecommendedPlans = () => {
           {['beginner', 'intermediate', 'pro'].map((level) => (
             <TabsContent key={level} value={level}>
               <Card>
-                <CardHeader>
-                  <CardTitle className="capitalize">{level} Workout Plan</CardTitle>
-                  <CardDescription>
-                    {level === 'beginner' ? 'Perfect for those just starting their fitness journey' :
-                     level === 'intermediate' ? 'For those with some training experience' :
-                     'Advanced training for experienced athletes'}
-                  </CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <div>
+                    <CardTitle className="capitalize">{level} Workout Plan</CardTitle>
+                    <CardDescription>
+                      {level === 'beginner' ? 'Perfect for those just starting their fitness journey' :
+                       level === 'intermediate' ? 'For those with some training experience' :
+                       'Advanced training for experienced athletes'}
+                    </CardDescription>
+                  </div>
+                  <Button 
+                    onClick={() => handleLoadPlan(level)}
+                    className="ml-auto flex items-center gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    Load Plan
+                  </Button>
                 </CardHeader>
                 <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Day</TableHead>
-                        <TableHead>Focus</TableHead>
-                        <TableHead>Exercises</TableHead>
-                        <TableHead>Duration</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {/* Beginner Plan */}
-                      {level === 'beginner' && [
-                        ['Monday', 'Full Body', 'Squats, Push-ups, Rows', '45 min'],
-                        ['Tuesday', 'Rest/Cardio', 'Walking, Light Cycling', '30 min'],
-                        ['Wednesday', 'Full Body', 'Lunges, Shoulder Press, Planks', '45 min'],
-                        ['Thursday', 'Rest/Mobility', 'Stretching, Yoga', '30 min'],
-                        ['Friday', 'Full Body', 'Deadlifts, Bench Press, Core', '45 min'],
-                        ['Saturday', 'Active Recovery', 'Swimming, Light Cardio', '40 min'],
-                        ['Sunday', 'Rest', 'Complete Rest', '-'],
-                      ].map(([day, focus, exercises, duration]) => (
-                        <TableRow key={day}>
-                          <TableCell>{day}</TableCell>
-                          <TableCell>{focus}</TableCell>
-                          <TableCell>{exercises}</TableCell>
-                          <TableCell>{duration}</TableCell>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Day</TableHead>
+                          <TableHead>Focus</TableHead>
+                          <TableHead>Exercises</TableHead>
+                          <TableHead>Duration</TableHead>
                         </TableRow>
-                      ))}
-                      
-                      {/* Intermediate Plan */}
-                      {level === 'intermediate' && [
-                        ['Monday', 'Push', 'Bench Press, Shoulder Press, Triceps', '60 min'],
-                        ['Tuesday', 'Pull', 'Rows, Pull-ups, Biceps', '60 min'],
-                        ['Wednesday', 'Legs', 'Squats, Deadlifts, Lunges', '60 min'],
-                        ['Thursday', 'Upper Body', 'Push-ups, Dips, Lateral Raises', '60 min'],
-                        ['Friday', 'Lower Body', 'Front Squats, RDLs, Calf Raises', '60 min'],
-                        ['Saturday', 'HIIT/Core', 'Circuit Training, Abs Work', '45 min'],
-                        ['Sunday', 'Rest', 'Active Recovery or Rest', '-'],
-                      ].map(([day, focus, exercises, duration]) => (
-                        <TableRow key={day}>
-                          <TableCell>{day}</TableCell>
-                          <TableCell>{focus}</TableCell>
-                          <TableCell>{exercises}</TableCell>
-                          <TableCell>{duration}</TableCell>
-                        </TableRow>
-                      ))}
-                      
-                      {/* Pro Plan */}
-                      {level === 'pro' && [
-                        ['Monday', 'Push Power', 'Bench Press, OHP, Advanced Push', '75 min'],
-                        ['Tuesday', 'Pull Power', 'Deadlifts, Weighted Pull-ups, Rows', '75 min'],
-                        ['Wednesday', 'Legs Power', 'Squat Variations, Olympic Lifts', '75 min'],
-                        ['Thursday', 'Push Hypertrophy', 'Volume Push Work, Isolation', '70 min'],
-                        ['Friday', 'Pull Hypertrophy', 'Back Volume, Grip Work', '70 min'],
-                        ['Saturday', 'Legs Hypertrophy', 'Leg Volume, Plyometrics', '70 min'],
-                        ['Sunday', 'Recovery', 'Mobility Work, Light Cardio', '45 min'],
-                      ].map(([day, focus, exercises, duration]) => (
-                        <TableRow key={day}>
-                          <TableCell>{day}</TableCell>
-                          <TableCell>{focus}</TableCell>
-                          <TableCell>{exercises}</TableCell>
-                          <TableCell>{duration}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {level === 'beginner' && beginnerPlan.map((plan) => (
+                          <TableRow key={plan.day}>
+                            <TableCell>{plan.day}</TableCell>
+                            <TableCell>{plan.focus}</TableCell>
+                            <TableCell>{plan.exercises}</TableCell>
+                            <TableCell>{plan.duration}</TableCell>
+                          </TableRow>
+                        ))}
+                        
+                        {level === 'intermediate' && intermediatePlan.map((plan) => (
+                          <TableRow key={plan.day}>
+                            <TableCell>{plan.day}</TableCell>
+                            <TableCell>{plan.focus}</TableCell>
+                            <TableCell>{plan.exercises}</TableCell>
+                            <TableCell>{plan.duration}</TableCell>
+                          </TableRow>
+                        ))}
+                        
+                        {level === 'pro' && proPlan.map((plan) => (
+                          <TableRow key={plan.day}>
+                            <TableCell>{plan.day}</TableCell>
+                            <TableCell>{plan.focus}</TableCell>
+                            <TableCell>{plan.exercises}</TableCell>
+                            <TableCell>{plan.duration}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>

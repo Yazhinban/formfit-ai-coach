@@ -1,10 +1,13 @@
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import Header from '@/components/Header';
 import WeeklyWorkingPlan from '@/components/WeeklyWorkingPlan';
 import { Button } from '@/components/ui/button';
 import { VideoIcon, BookOpen } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 
 interface WorkoutPlan {
   id: string;
@@ -43,6 +46,30 @@ const WorkoutPlanPage = () => {
       completed: true
     }
   ]);
+
+  // Check for loaded plans from local storage
+  useEffect(() => {
+    const savedPlan = localStorage.getItem('selectedWorkoutPlan');
+    if (savedPlan) {
+      try {
+        const planData = JSON.parse(savedPlan);
+        const formattedPlans = planData.map((plan: any) => ({
+          id: uuidv4(),
+          day: plan.day.toLowerCase(),
+          exerciseType: plan.focus,
+          duration: plan.duration,
+          setsReps: plan.exercises.includes(',') ? '3x12' : '4x10', // Default sets/reps
+          completed: false
+        }));
+        
+        setWorkingPlans(formattedPlans);
+        // Clear the saved plan after loading
+        localStorage.removeItem('selectedWorkoutPlan');
+      } catch (error) {
+        console.error('Error loading saved workout plan:', error);
+      }
+    }
+  }, []);
 
   const handleAddWorkingPlan = (plan: Partial<WorkoutPlan>) => {
     const newPlan: WorkoutPlan = {
@@ -95,13 +122,67 @@ const WorkoutPlanPage = () => {
           </div>
         </div>
         
-        <div className="max-w-4xl mx-auto">
-          <WeeklyWorkingPlan 
-            plans={workingPlans}
-            onAddPlan={handleAddWorkingPlan}
-            onUpdatePlan={handleUpdateWorkingPlan}
-            onDeletePlan={handleDeleteWorkingPlan}
-          />
+        <div className="grid grid-cols-1 gap-6">
+          {/* Weekly schedule in table format */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Weekly Schedule Overview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Day</TableHead>
+                      <TableHead>Workout Type</TableHead>
+                      <TableHead>Duration</TableHead>
+                      <TableHead>Sets & Reps</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => {
+                      const plansForDay = workingPlans.filter(p => p.day.toLowerCase() === day);
+                      
+                      return plansForDay.length > 0 ? (
+                        plansForDay.map((plan) => (
+                          <TableRow key={plan.id}>
+                            <TableCell className="capitalize">{day}</TableCell>
+                            <TableCell>{plan.exerciseType}</TableCell>
+                            <TableCell>{plan.duration}</TableCell>
+                            <TableCell>{plan.setsReps}</TableCell>
+                            <TableCell>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                plan.completed 
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-amber-100 text-amber-800'
+                              }`}>
+                                {plan.completed ? 'Completed' : 'Pending'}
+                              </span>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow key={day}>
+                          <TableCell className="capitalize">{day}</TableCell>
+                          <TableCell colSpan={4} className="text-muted-foreground">No workout scheduled</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <div className="max-w-4xl mx-auto">
+            <WeeklyWorkingPlan 
+              plans={workingPlans}
+              onAddPlan={handleAddWorkingPlan}
+              onUpdatePlan={handleUpdateWorkingPlan}
+              onDeletePlan={handleDeleteWorkingPlan}
+            />
+          </div>
         </div>
       </main>
       

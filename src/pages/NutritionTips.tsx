@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ChevronRight, VideoIcon, Apple, UtensilsCrossed, Coffee, Salad, Scale, Leaf, Wind, Timer, BarChart, Flame, Heart } from 'lucide-react';
+import { ChevronRight, VideoIcon, Apple, UtensilsCrossed, Coffee, Salad, Scale, Leaf, Pills, Flask, Battery, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from 'framer-motion';
@@ -11,34 +11,6 @@ import { motion } from 'framer-motion';
 const NutritionTips = () => {
   const [dietType, setDietType] = useState<'bulking' | 'cutting'>('bulking');
 
-  const workoutRecommendations = [
-    {
-      title: "Focus on compound exercises",
-      description: "Compound exercises like squats, deadlifts, and pull-ups work multiple muscle groups, maximizing workout efficiency.",
-      icon: <Flame className="h-5 w-5 text-primary" />
-    },
-    {
-      title: "Proper form over heavy weights",
-      description: "Always prioritize using correct form over lifting heavier weights. This prevents injury and ensures muscle engagement.",
-      icon: <Scale className="h-5 w-5 text-primary" />
-    },
-    {
-      title: "Include rest days",
-      description: "Rest days are essential for muscle recovery and growth. Aim for 1-2 rest days per week.",
-      icon: <Wind className="h-5 w-5 text-primary" />
-    },
-    {
-      title: "Progressive overload",
-      description: "Gradually increase weight, frequency, or reps to continuously challenge your muscles.",
-      icon: <BarChart className="h-5 w-5 text-primary" />
-    },
-    {
-      title: "Timed workouts",
-      description: "Keep your workouts to 45-60 minutes to maintain intensity and prevent cortisol spikes.",
-      icon: <Timer className="h-5 w-5 text-primary" />
-    }
-  ];
-  
   const nutritionTips = [
     {
       title: "Protein intake",
@@ -58,7 +30,7 @@ const NutritionTips = () => {
     {
       title: "Meal timing",
       description: "Time your carbohydrates around workouts and consider protein intake within 30 minutes post-workout.",
-      icon: <Timer className="h-5 w-5 text-primary" />
+      icon: <Coffee className="h-5 w-5 text-primary" />
     },
     {
       title: "Whole foods focus",
@@ -74,6 +46,44 @@ const NutritionTips = () => {
       title: "Anti-inflammatory foods",
       description: "Include foods rich in omega-3s and antioxidants to reduce exercise-induced inflammation.",
       icon: <Leaf className="h-5 w-5 text-primary" />
+    }
+  ];
+
+  const supplementTips = [
+    {
+      title: "Protein Powder",
+      description: "A convenient way to meet protein requirements, especially post-workout. Choose whey, plant-based, or casein depending on your dietary preferences.",
+      icon: <Flask className="h-5 w-5 text-primary" />
+    },
+    {
+      title: "Creatine Monohydrate",
+      description: "One of the most researched supplements, enhances strength, power, and muscle recovery. Take 3-5g daily, no need for loading phase.",
+      icon: <Pills className="h-5 w-5 text-primary" />
+    },
+    {
+      title: "Pre-Workout",
+      description: "Contains caffeine and other ingredients to boost energy and focus. Look for products without excessive stimulants or artificial colors.",
+      icon: <Battery className="h-5 w-5 text-primary" />
+    },
+    {
+      title: "BCAAs",
+      description: "Branch-chain amino acids may help with muscle retention during caloric deficit or fasted training. Not essential if protein intake is adequate.",
+      icon: <Pills className="h-5 w-5 text-primary" />
+    },
+    {
+      title: "Fish Oil / Omega-3",
+      description: "Supports joint health, reduces inflammation, and provides cardiovascular benefits. Look for high EPA/DHA content.",
+      icon: <Heart className="h-5 w-5 text-primary" />
+    },
+    {
+      title: "Vitamin D",
+      description: "Essential for bone health, immune function, and hormonal health. Most people are deficient, especially in northern climates.",
+      icon: <Pills className="h-5 w-5 text-primary" />
+    },
+    {
+      title: "ZMA (Zinc, Magnesium, B6)",
+      description: "Supports sleep quality, recovery, and hormonal balance. Take before bed on an empty stomach.",
+      icon: <Flask className="h-5 w-5 text-primary" />
     }
   ];
 
@@ -104,7 +114,7 @@ const NutritionTips = () => {
       <main className="flex-1 container max-w-7xl py-8 px-4 sm:px-6">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Workout & Nutrition Guidance</h1>
+            <h1 className="text-3xl font-bold mb-2">Nutrition & Supplements Guide</h1>
             <p className="text-muted-foreground">Expert advice to maximize your fitness results</p>
           </div>
           <Link to="/form-analyzer">
@@ -116,7 +126,7 @@ const NutritionTips = () => {
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Diet Plans - Moved to first position */}
+          {/* Diet Plans */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -201,21 +211,12 @@ const NutritionTips = () => {
                       ? 'This bulking plan aims for a 500 calorie surplus to promote muscle growth.' 
                       : 'This cutting plan creates a 500 calorie deficit while maintaining protein intake.'}
                   </p>
-                  
-                  <div className="mt-4">
-                    <Link to="/form-analyzer">
-                      <Button variant="outline" className="w-full group">
-                        <span>Analyze Your Form</span>
-                        <ChevronRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    </Link>
-                  </div>
                 </div>
               </CardContent>
             </Card>
           </motion.div>
           
-          {/* Nutrition Tips - Moved to second position */}
+          {/* Nutrition Tips */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -254,7 +255,7 @@ const NutritionTips = () => {
             </Card>
           </motion.div>
           
-          {/* Workout Recommendations - Moved to third position */}
+          {/* Supplement Tips - New card replacing the workout recommendations */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -264,14 +265,14 @@ const NutritionTips = () => {
             <Card>
               <CardHeader className="bg-gradient-to-r from-primary/10 to-background rounded-t-lg">
                 <CardTitle className="flex items-center gap-2">
-                  <Flame className="h-5 w-5" />
-                  Workout Recommendations
+                  <Pills className="h-5 w-5" />
+                  Gym Supplements
                 </CardTitle>
-                <CardDescription>Science-backed exercise guidance for optimal results</CardDescription>
+                <CardDescription>Science-backed supplements to consider for your fitness journey</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-4">
-                  {workoutRecommendations.map((tip, i) => (
+                  {supplementTips.map((tip, i) => (
                     <motion.li 
                       key={i}
                       initial={{ opacity: 0, x: -5 }}
@@ -289,6 +290,18 @@ const NutritionTips = () => {
                     </motion.li>
                   ))}
                 </ul>
+
+                <div className="mt-6 pt-4 border-t border-border/30">
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Note: Always consult with a healthcare professional before starting any supplement regimen. Quality and sourcing matter - look for third-party tested products.
+                  </p>
+                  <Link to="/form-analyzer">
+                    <Button variant="outline" className="w-full group">
+                      <span>Analyze Your Form</span>
+                      <ChevronRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
+                </div>
               </CardContent>
             </Card>
           </motion.div>
