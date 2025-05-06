@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ChevronRight, VideoIcon, Apple, UtensilsCrossed, Coffee, Salad, Scale, Leaf, Pills, Flask, Battery, Heart } from 'lucide-react';
+import { ChevronRight, VideoIcon, Apple, UtensilsCrossed, Coffee, Salad, Scale, Leaf, Pill, FlaskRound, Battery, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from 'framer-motion';
@@ -53,12 +52,12 @@ const NutritionTips = () => {
     {
       title: "Protein Powder",
       description: "A convenient way to meet protein requirements, especially post-workout. Choose whey, plant-based, or casein depending on your dietary preferences.",
-      icon: <Flask className="h-5 w-5 text-primary" />
+      icon: <FlaskRound className="h-5 w-5 text-primary" />
     },
     {
       title: "Creatine Monohydrate",
       description: "One of the most researched supplements, enhances strength, power, and muscle recovery. Take 3-5g daily, no need for loading phase.",
-      icon: <Pills className="h-5 w-5 text-primary" />
+      icon: <Pill className="h-5 w-5 text-primary" />
     },
     {
       title: "Pre-Workout",
@@ -68,7 +67,7 @@ const NutritionTips = () => {
     {
       title: "BCAAs",
       description: "Branch-chain amino acids may help with muscle retention during caloric deficit or fasted training. Not essential if protein intake is adequate.",
-      icon: <Pills className="h-5 w-5 text-primary" />
+      icon: <Pill className="h-5 w-5 text-primary" />
     },
     {
       title: "Fish Oil / Omega-3",
@@ -78,12 +77,12 @@ const NutritionTips = () => {
     {
       title: "Vitamin D",
       description: "Essential for bone health, immune function, and hormonal health. Most people are deficient, especially in northern climates.",
-      icon: <Pills className="h-5 w-5 text-primary" />
+      icon: <Pill className="h-5 w-5 text-primary" />
     },
     {
       title: "ZMA (Zinc, Magnesium, B6)",
       description: "Supports sleep quality, recovery, and hormonal balance. Take before bed on an empty stomach.",
-      icon: <Flask className="h-5 w-5 text-primary" />
+      icon: <FlaskRound className="h-5 w-5 text-primary" />
     }
   ];
 
@@ -265,7 +264,7 @@ const NutritionTips = () => {
             <Card>
               <CardHeader className="bg-gradient-to-r from-primary/10 to-background rounded-t-lg">
                 <CardTitle className="flex items-center gap-2">
-                  <Pills className="h-5 w-5" />
+                  <Pill className="h-5 w-5" />
                   Gym Supplements
                 </CardTitle>
                 <CardDescription>Science-backed supplements to consider for your fitness journey</CardDescription>
